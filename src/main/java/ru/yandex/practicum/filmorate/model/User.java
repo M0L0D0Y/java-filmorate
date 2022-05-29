@@ -8,11 +8,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+
 @Data
 public class User {
     private final long id = UserIdGenerator.generate();
-    @NotNull
     @Email
+    @NotNull
     private final String email;
     @NotNull
     @NotBlank
