@@ -3,23 +3,18 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
 public class User {
     private final long id = UserIdGenerator.generate();
-    @Email
-    @NotNull
+    @Email(message = "Почта должна быть правильного формата")
     private final String email;
-    @NotNull
-    @NotBlank
+    @NotEmpty(message = "Логин не должен быть пустым")
     private final String login;
     private String name;
-    @Past
+    @Past(message = "Дата рождения должна быть в прошлом")
     private final LocalDate birthday;
 
 }
