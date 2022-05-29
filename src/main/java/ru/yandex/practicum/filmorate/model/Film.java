@@ -15,8 +15,8 @@ public class Film {
     @NotNull
     @NotBlank
     private final String description;
-    @NotNull
     @Past
+    @NotNull
     private final LocalDate releaseDate;
     @NotNull
     @Positive
