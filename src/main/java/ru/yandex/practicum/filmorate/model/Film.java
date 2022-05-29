@@ -9,16 +9,12 @@ import java.time.LocalDate;
 @Data
 public class Film {
     private final long id = FilmIdGenerator.generate();
-    @NotNull
-    @NotBlank
+    @NotEmpty(message = "Нет названия фильма")
     private final String name;
-    @NotNull
-    @NotBlank
+    @NotEmpty(message = "Нет описания фильма")
     private final String description;
-    @Past
-    @NotNull
+    @Past(message = "Дата релиза не может быть в будущем")
     private final LocalDate releaseDate;
-    @NotNull
-    @Positive
-    private final short duration;
+    @Positive(message = "Продолжительность фильма не может быть отрицательной")
+    private final int duration;
 }

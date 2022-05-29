@@ -45,7 +45,7 @@ public class FilmController {
 
     private void validationFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
-            throw new ValidationException("нет названия фильма");
+            throw new ValidationException("Нет названия фильма");
         }
         if (film.getDescription().length() > LINE_LENGTH) {
             throw new ValidationException("Длинна описания фильма слишком большая");

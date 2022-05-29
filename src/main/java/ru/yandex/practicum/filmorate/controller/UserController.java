@@ -41,7 +41,7 @@ public class UserController {
     }
 
     private void validationUser(User user) throws ValidationException {
-        if ((user.getEmail() == null) || (user.getEmail().contains(DOG_SYMBOL))) {
+        if ((user.getEmail() == null) || (!(user.getEmail().contains(DOG_SYMBOL)))) {
             throw new ValidationException("Неправильный формат почты");
         }
         if ((user.getLogin() == null) || (EMPTY_STRING.equals(user.getLogin()))) {
