@@ -45,10 +45,10 @@ public class FilmController {
 
     private void validationFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
-            throw new ValidationException("Нет названия фильма");
+            throw new ValidationException("Нет названия фильма " + film.getName());
         }
         if (film.getDescription().length() > LINE_LENGTH) {
-            throw new ValidationException("Длинна описания фильма слишком большая");
+            throw new ValidationException("Длинна описания фильма слишком большая " + film.getDescription().length());
         }
         if (film.getReleaseDate().isBefore(DATE_RELEASE)) {
             throw new ValidationException("Дата релиза перед " + DATE_RELEASE);

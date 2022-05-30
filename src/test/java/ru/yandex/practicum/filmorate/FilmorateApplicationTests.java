@@ -18,34 +18,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-class FilmorateApplicationTests {
+class ValidatorTest {
     private static final String EMPTY_STRING = "";
-    private static final String DOG_SYMBOL = "@";
+    private static final String EMAIL_SYMBOL = "@";
     private static Validator validator;
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
 
     private static void validationUser(User user) throws ValidationException {
-        if ((user.getEmail() == null) || (!(user.getEmail().contains(DOG_SYMBOL)))) {
-            throw new ValidationException("Неправильный формат почты");
+        if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
+            throw new ValidationException("Неправильный формат почты " + user.getEmail());
         }
         if ((user.getLogin() == null) || (EMPTY_STRING.equals(user.getLogin()))) {
-            throw new ValidationException("Неправильный формат логина");
+            throw new ValidationException("Неправильный формат логина " + user.getLogin());
         }
         if ((user.getName() == null) || (EMPTY_STRING.equals(user.getName()))) {
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем");
+            throw new ValidationException("Дата рождения не может быть в будущем " + user.getBirthday());
         }
     }
 
     private static void validationFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
-            throw new ValidationException("Нет названия фильма");
+            throw new ValidationException("Нет названия фильма " + film.getName());
         }
         if (film.getDescription().length() > LINE_LENGTH) {
-            throw new ValidationException("Длинна описания фильма слишком большая");
+            throw new ValidationException("Длинна описания фильма слишком большая " +film.getDescription().length());
         }
         if (film.getReleaseDate().isBefore(DATE_RELEASE)) {
             throw new ValidationException("Дата релиза перед " + DATE_RELEASE);
