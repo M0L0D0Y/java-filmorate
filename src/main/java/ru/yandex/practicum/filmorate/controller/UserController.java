@@ -13,7 +13,7 @@ import java.util.Collection;
 @RestController
 public class UserController {
 
-    private final InMemoryUserStorage memoryUserStorage = new InMemoryUserStorage();
+    private final InMemoryUserStorage memoryUserStorage = InMemoryUserStorage.getInMemoryUserStorage();
 
     @GetMapping("/users")
     public Collection<User> getAllUsers() {

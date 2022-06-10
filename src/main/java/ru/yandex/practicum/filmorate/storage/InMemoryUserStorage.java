@@ -11,9 +11,12 @@ import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
+    private static final InMemoryUserStorage INSTANCE = new InMemoryUserStorage();
 
     private final Map<Long, User> users = new HashMap<>();
     private final Validator validator = Validator.getValidator();
+    private InMemoryUserStorage(){
+    }
 
     @Override
     public Collection<User> getAllUser() {
@@ -40,5 +43,11 @@ public class InMemoryUserStorage implements UserStorage {
         validator.validateUser(user);
         users.put(user.getId(), user);
         return user;
+    }
+    public User getUser(long id){
+        return users.get(id);
+    }
+    public static InMemoryUserStorage getInMemoryUserStorage() {
+        return INSTANCE;
     }
 }

@@ -12,7 +12,7 @@ public class Validator {
     private static final String EMPTY_STRING = "";
     private static final String EMAIL_SYMBOL = "@";
 
-    public Validator() {
+    private Validator() {
     }
 
     public void validateFilm(Film film) throws ValidationException {

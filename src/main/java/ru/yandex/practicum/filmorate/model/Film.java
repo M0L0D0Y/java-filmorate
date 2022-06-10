@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
+    private final long likes;
     private final long id = FilmIdGenerator.generate();
     @NotEmpty(message = "Нет названия фильма")
     private final String name;

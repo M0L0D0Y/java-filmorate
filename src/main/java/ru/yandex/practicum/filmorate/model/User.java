@@ -5,9 +5,11 @@ import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class User {
+    private Set<Long> listFriends;
     private final long id = UserIdGenerator.generate();
     @Email(message = "Почта должна быть правильного формата")
     private final String email;
