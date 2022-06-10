@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmComparator;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +35,7 @@ public class FilmService {
         listUsers.clear();
     }
 
-    private List<Film> getMostPopularFilms(long count) {
+    public List<Film> getMostPopularFilms(long count) {
         FilmComparator comparator= new FilmComparator();
         List<Film> filmList = new LinkedList<>(memoryFilmStorage.getAllFilm());
         return filmList.stream().sorted(comparator)
