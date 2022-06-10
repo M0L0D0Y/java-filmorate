@@ -12,8 +12,14 @@ import java.util.Map;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
+    private static final InMemoryFilmStorage INSTANCE = new InMemoryFilmStorage();
+
     private final Map<Long, Film> films = new HashMap<>();
     private final Validator validator = Validator.getValidator();
+
+    private InMemoryFilmStorage() {
+
+    }
 
     @Override
     public Collection<Film> getAllFilm() {
@@ -40,5 +46,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         validator.validateFilm(film);
         films.put(film.getId(), film);
         return film;
+    }
+
+    public Film getFilm(long id) {
+        return films.get(id);
+    }
+
+    public static InMemoryFilmStorage getInMemoryFilmStorage() {
+        return INSTANCE;
     }
 }

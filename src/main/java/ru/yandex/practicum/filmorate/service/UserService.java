@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /*
  * операции с пользователями, как добавление в друзья,
@@ -51,5 +48,15 @@ public class UserService {
             friends.add(memoryUserStorage.getUser(value));
         }
         return friends;
+    }
+    public List<User> getCommonUsers(long id, long friendId){
+        List<Long> userListFriend = new LinkedList<>(memoryUserStorage.getUser(id).getListFriends());
+        List<Long> friendListFriend = new LinkedList<>(memoryUserStorage.getUser(friendId).getListFriends());
+        List<User> commonFriends  = new LinkedList<>();
+        userListFriend.retainAll(friendListFriend);
+        for (long value : userListFriend) {
+            commonFriends.add(memoryUserStorage.getUser(value));
+        }
+        return commonFriends;
     }
 }
