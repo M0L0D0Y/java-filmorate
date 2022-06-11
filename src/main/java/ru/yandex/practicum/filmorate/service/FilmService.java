@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmComparator;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.*;
@@ -14,10 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
 
-    private final InMemoryFilmStorage memoryFilmStorage = InMemoryFilmStorage.getInMemoryFilmStorage();
+    private final FilmStorage memoryFilmStorage = InMemoryFilmStorage.getInMemoryFilmStorage();
     private Set<Long> listUsers = new HashSet<>();
 
-    public void addLike(long filmId, long userId) {
+    public void addLike(long filmId, long userId) throws ValidationException, NullPointerException  {
         Film film = memoryFilmStorage.getFilm(filmId);
         listUsers = film.getIdUsersWhoLiked();
         listUsers.add(userId);
@@ -26,7 +28,7 @@ public class FilmService {
         listUsers.clear();
     }
 
-    public void deleteLike(long filmId, long userId) {
+    public void deleteLike(long filmId, long userId) throws ValidationException, NullPointerException  {
         Film film = memoryFilmStorage.getFilm(filmId);
         listUsers = film.getIdUsersWhoLiked();
         listUsers.remove(userId);
