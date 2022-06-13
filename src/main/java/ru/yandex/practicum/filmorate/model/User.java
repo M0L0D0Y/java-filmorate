@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;

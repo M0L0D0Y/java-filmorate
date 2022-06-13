@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -12,9 +13,9 @@ public interface FilmStorage {
 
     Film addFilm(Film film) throws ValidationException;
 
-    void deleteFilm(long id) throws ValidationException;
+    void deleteFilm(long id) throws NotFoundException;
 
-    Film updateFilm(Film film) throws ValidationException;
+    Film updateFilm(Film film) throws ValidationException, NotFoundException;
 
-    Film getFilm(long id) throws ValidationException;
+    Film getFilm(long id) throws NotFoundException;
 }

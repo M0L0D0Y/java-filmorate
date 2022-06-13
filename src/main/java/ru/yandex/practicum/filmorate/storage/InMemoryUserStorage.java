@@ -10,10 +10,11 @@ import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private static final UserStorage INSTANCE = new InMemoryUserStorage();
+    private static final InMemoryUserStorage INSTANCE = new InMemoryUserStorage();
 
     private final Map<Long, User> users = new HashMap<>();
     private final Validator validator = Validator.getValidator();
@@ -36,37 +37,33 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(long id) throws NotFoundException {
-        if (id <= 0) {
-            throw new NotFoundException("Id должен быть больше нуля " + id);
-        }
-        if (!(users.containsKey(id))) {
-            throw new NotFoundException("Пользователя с таким id нет " + id);
+        Set<Long> listIdUser = users.keySet();
+        if (!(listIdUser.contains(id))) {
+            throw new NotFoundException("Нет пользователя с таким Id " + id);
         }
         users.remove(id);
     }
 
     @Override
     public User updateUser(User user) throws ValidationException, NotFoundException {
-        if (user.getId() <= 0) {
-            throw new NotFoundException("id меньше или равен нулю " + user.getId());
+        Set<Long> listIdUser = users.keySet();
+        if (!(listIdUser.contains(user.getId()))) {
+            throw new NotFoundException("Нет пользователя с таким Id " + user.getId());
         }
         validator.validateUser(user);
         users.put(user.getId(), user);
         return user;
     }
 
-    @Override
     public User getUser(long id) throws NotFoundException {
-        if (id <= 0) {
-            throw new NotFoundException("Id должен быть больше нуля " + id);
-        }
-        if (!(users.containsKey(id))) {
-            throw new NotFoundException("Пользователя с таким id нет " + id);
+        Set<Long> listIdUser = users.keySet();
+        if (!(listIdUser.contains(id))) {
+            throw new NotFoundException("Нет пользователя с таким Id " + id);
         }
         return users.get(id);
     }
 
-    public static UserStorage getInMemoryUserStorage() {
+    public static InMemoryUserStorage getInMemoryUserStorage() {
         return INSTANCE;
     }
 }

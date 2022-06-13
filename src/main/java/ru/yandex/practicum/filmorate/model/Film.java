@@ -5,13 +5,14 @@ import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
 public class Film {
     private int likes;
-    private Set<Long> idUsersWhoLiked;
-    private final long id = FilmIdGenerator.generate();
+    private Set<Long> idUsersWhoLiked = new HashSet<>();
+    private long id;
     @NotEmpty(message = "Нет названия фильма")
     private final String name;
     @NotEmpty(message = "Нет описания фильма")

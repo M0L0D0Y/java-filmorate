@@ -13,10 +13,9 @@ public interface UserStorage {
 
     User addUser(User user) throws ValidationException;
 
-    void deleteUser(long id) throws ValidationException, NotFoundException;
+    void deleteUser(long id) throws NotFoundException;
 
     User updateUser(User user) throws ValidationException, NotFoundException;
 
-    User getUser(long id) throws ValidationException, NotFoundException;
-
+    User getUser(long id) throws NotFoundException;
 }

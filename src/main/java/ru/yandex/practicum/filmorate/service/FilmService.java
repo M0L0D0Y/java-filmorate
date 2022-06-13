@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmComparator;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -16,29 +17,37 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
 
-    private final FilmStorage memoryFilmStorage = InMemoryFilmStorage.getInMemoryFilmStorage();
-    private Set<Long> listUsers = new HashSet<>();
+    private final FilmStorage memoryFilmStorage;
+    private Set<Long> listFilm = new HashSet<>();
 
-    public void addLike(long filmId, long userId) throws ValidationException, NullPointerException  {
-        Film film = memoryFilmStorage.getFilm(filmId);
-        listUsers = film.getIdUsersWhoLiked();
-        listUsers.add(userId);
-        film.setIdUsersWhoLiked(listUsers);
-        film.setLikes(listUsers.size());
-        listUsers.clear();
+    @Autowired
+    public FilmService(InMemoryFilmStorage memoryFilmStorage) {
+        this.memoryFilmStorage = memoryFilmStorage;
     }
 
-    public void deleteLike(long filmId, long userId) throws ValidationException, NullPointerException  {
+    public void addLike(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
-        listUsers = film.getIdUsersWhoLiked();
-        listUsers.remove(userId);
-        film.setIdUsersWhoLiked(listUsers);
-        film.setLikes(listUsers.size());
-        listUsers.clear();
+        listFilm = film.getIdUsersWhoLiked();
+        listFilm.add(userId);
+        film.setIdUsersWhoLiked(listFilm);
+        film.setLikes(listFilm.size());
+        listFilm.clear();
+    }
+
+    public void deleteLike(long filmId, long userId) throws NotFoundException {
+        Film film = memoryFilmStorage.getFilm(filmId);
+        listFilm = film.getIdUsersWhoLiked();
+        if (!(listFilm.contains(userId))) {
+            throw new NotFoundException("нет пользователя с таким Id " + userId);
+        }
+        listFilm.remove(userId);
+        film.setIdUsersWhoLiked(listFilm);
+        film.setLikes(listFilm.size());
+        listFilm.clear();
     }
 
     public List<Film> getMostPopularFilms(long count) {
-        FilmComparator comparator= new FilmComparator();
+        FilmComparator comparator = new FilmComparator();
         List<Film> filmList = new LinkedList<>(memoryFilmStorage.getAllFilm());
         return filmList.stream().sorted(comparator)
                 .limit(count)
