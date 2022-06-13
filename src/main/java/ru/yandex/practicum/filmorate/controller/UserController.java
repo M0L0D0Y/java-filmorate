@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,11 +19,11 @@ public class UserController {
     private final UserService userService;
     private final UserStorage memoryUserStorage;
 
+    @Autowired
     public UserController(UserService userService, UserStorage memoryUserStorage) {
         this.userService = userService;
         this.memoryUserStorage = memoryUserStorage;
     }
-
 
     @GetMapping("/users")
     public Collection<User> getAllUsers() {
@@ -34,14 +35,19 @@ public class UserController {
         return memoryUserStorage.getUser(id);
     }
 
+    @GetMapping(value = "/users/{id}/friends")
+    public List<User> getListFriend(@PathVariable long id) throws NotFoundException {
+        return userService.getListFriend(id);
+    }
+
+    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
+    public List<User> getCommonUsers(@PathVariable long id, @PathVariable long otherId) throws NotFoundException {
+        return userService.getCommonUsers(id, otherId);
+    }
+
     @PostMapping(value = "/users")
     public User addUser(@Valid @RequestBody User user) throws ValidationException {
         return memoryUserStorage.addUser(user);
-    }
-
-    @DeleteMapping(value = "/users")
-    public void deleteUser(long id) throws NotFoundException {
-        memoryUserStorage.deleteUser(id);
     }
 
     @PutMapping(value = "/users")
@@ -50,25 +56,17 @@ public class UserController {
     }
 
     @PutMapping(value = "/users/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable long id,
-                          @PathVariable long friendId) throws NotFoundException {
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) throws NotFoundException {
         userService.addFriend(id, friendId);
     }
 
+    @DeleteMapping(value = "/users")
+    public void deleteUser(long id) throws NotFoundException {
+        memoryUserStorage.deleteUser(id);
+    }
+
     @DeleteMapping(value = "/users/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable long id,
-                             @PathVariable long friendId) throws NotFoundException {
+    public void deleteFriend(@PathVariable long id, @PathVariable long friendId) throws NotFoundException {
         userService.deleteFriend(id, friendId);
-    }
-
-    @GetMapping(value = "/users/{id}/friends")
-    public List<User> getListFriend(@PathVariable long id) throws NotFoundException {
-        return userService.getListFriend(id);
-    }
-
-    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
-    public List<User> getCommonUsers(@PathVariable long id,
-                                     @PathVariable long otherId) throws NotFoundException {
-        return userService.getCommonUsers(id, otherId);
     }
 }

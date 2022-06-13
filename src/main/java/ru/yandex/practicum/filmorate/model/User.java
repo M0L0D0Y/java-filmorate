@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -19,5 +18,4 @@ public class User {
     private String name;
     @Past(message = "Дата рождения должна быть в прошлом")
     private final LocalDate birthday;
-
 }

@@ -6,8 +6,6 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 
-/*
- * в которых будут определены методы добавления, удаления и модификации объектов.*/
 public interface UserStorage {
     Collection<User> getAllUser();
 

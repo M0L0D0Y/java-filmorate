@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -15,13 +16,12 @@ import java.util.Set;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private static final InMemoryFilmStorage INSTANCE = new InMemoryFilmStorage();
-
     private final Map<Long, Film> films = new HashMap<>();
-    private final Validator validator = Validator.getValidator();
+    private final Validator validator;// = Validator.getValidator();
 
-    private InMemoryFilmStorage() {
-
+    @Autowired
+    private InMemoryFilmStorage(Validator validator) {
+        this.validator = validator;
     }
 
     @Override
@@ -31,8 +31,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) throws ValidationException {
-        film.setId(FilmIdGenerator.generate());
         validator.validateFilm(film);
+        film.setId(FilmIdGenerator.generate());
         films.put(film.getId(), film);
         return film;
     }
@@ -57,15 +57,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public Film getFilm(long id) throws NotFoundException {
         Set<Long> listIdFilm = films.keySet();
         if (!(listIdFilm.contains(id))) {
             throw new NotFoundException("Нет фильма с таким Id " + id);
         }
         return films.get(id);
-    }
-
-    public static InMemoryFilmStorage getInMemoryFilmStorage() {
-        return INSTANCE;
     }
 }

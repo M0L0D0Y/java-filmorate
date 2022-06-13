@@ -9,13 +9,11 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 
-/*
- * операции с пользователями, как добавление в друзья,
- * удаление из друзей, вывод списка общих друзей*/
 @Service
 public class UserService {
 
     private final UserStorage memoryUserStorage;
+
     @Autowired
     public UserService(InMemoryUserStorage memoryUserStorage) {
         this.memoryUserStorage = memoryUserStorage;
@@ -25,44 +23,46 @@ public class UserService {
     public void addFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriends;
-        listFriends = user.getListFriends();
-        listFriends.add(friendId);
-        user.setListFriends(listFriends);
-        listFriends.clear();
-        listFriends = friend.getListFriends();
-        friend.setListFriends(listFriends);
-        listFriends.clear();
+        Set<Long> listFriendsUser;
+        listFriendsUser = user.getListFriends();
+        listFriendsUser.add(friendId);
+        user.setListFriends(listFriendsUser);
+        Set<Long> listFriendsFriend;
+        listFriendsFriend = friend.getListFriends();
+        listFriendsFriend.add(id);
+        friend.setListFriends(listFriendsFriend);
     }
 
     public void deleteFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriends;
-        listFriends = user.getListFriends();
-        listFriends.remove(friendId);
-        user.setListFriends(listFriends);
-        listFriends.clear();
-        listFriends = friend.getListFriends();
-        listFriends.remove(id);
-        friend.setListFriends(listFriends);
-        listFriends.clear();
+        Set<Long> listFriendsUser;
+        listFriendsUser = user.getListFriends();
+        listFriendsUser.remove(friendId);
+        user.setListFriends(listFriendsUser);
+        Set<Long> listFriendsFriend;
+        listFriendsFriend = friend.getListFriends();
+        listFriendsFriend.remove(id);
+        friend.setListFriends(listFriendsFriend);
     }
 
     public List<User> getListFriend(long id) throws NotFoundException {
         List<User> friends = new ArrayList<>();
         User user = memoryUserStorage.getUser(id);
-        Set<Long> listFriends;
-        listFriends = user.getListFriends();
-        for (long value : listFriends) {
+        Set<Long> listIdFriends = user.getListFriends();
+        if (listIdFriends.isEmpty()) {
+            return friends;
+        }
+        for (long value : listIdFriends) {
             friends.add(memoryUserStorage.getUser(value));
         }
         return friends;
     }
+
     public List<User> getCommonUsers(long id, long friendId) throws NotFoundException {
         List<Long> userListFriend = new LinkedList<>(memoryUserStorage.getUser(id).getListFriends());
         List<Long> friendListFriend = new LinkedList<>(memoryUserStorage.getUser(friendId).getListFriends());
-        List<User> commonFriends  = new LinkedList<>();
+        List<User> commonFriends = new LinkedList<>();
         userListFriend.retainAll(friendListFriend);
         for (long value : userListFriend) {
             commonFriends.add(memoryUserStorage.getUser(value));

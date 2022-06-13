@@ -5,45 +5,48 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmComparator;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-/*
- * операции с фильмами, — добавление и удаление лайка,
- * вывод 10 наиболее популярных фильмов по количеству лайков. */
 @Service
 public class FilmService {
 
     private final FilmStorage memoryFilmStorage;
-    private Set<Long> listFilm = new HashSet<>();
+    private final UserStorage memoryUserStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage memoryFilmStorage) {
+    public FilmService(InMemoryFilmStorage memoryFilmStorage, InMemoryUserStorage memoryUserStorage) {
         this.memoryFilmStorage = memoryFilmStorage;
+        this.memoryUserStorage = memoryUserStorage;
     }
 
-    public void addLike(long filmId, long userId) throws NotFoundException {
+    public void addLikeFilm(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
-        listFilm = film.getIdUsersWhoLiked();
-        listFilm.add(userId);
-        film.setIdUsersWhoLiked(listFilm);
-        film.setLikes(listFilm.size());
-        listFilm.clear();
+        User user = memoryUserStorage.getUser(userId);//для проверки существования такого id пользователя
+        Set<Long> UsersWhoLiked = film.getIdUsersWhoLiked();
+        UsersWhoLiked.add(userId);
+        film.setIdUsersWhoLiked(UsersWhoLiked);
+        film.setLikes(UsersWhoLiked.size());
+        //TODO не ставятся лайки при первом проходе теста
     }
 
     public void deleteLike(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
-        listFilm = film.getIdUsersWhoLiked();
-        if (!(listFilm.contains(userId))) {
+        Set<Long> UsersWhoLiked;
+        UsersWhoLiked = film.getIdUsersWhoLiked();
+        if (!(UsersWhoLiked.contains(userId))) {
             throw new NotFoundException("нет пользователя с таким Id " + userId);
         }
-        listFilm.remove(userId);
-        film.setIdUsersWhoLiked(listFilm);
-        film.setLikes(listFilm.size());
-        listFilm.clear();
+        UsersWhoLiked.remove(userId);
+        film.setIdUsersWhoLiked(UsersWhoLiked);
+        film.setLikes(UsersWhoLiked.size());
+        //TODO скорее всего не удаляются лайки
     }
 
     public List<Film> getMostPopularFilms(long count) {
@@ -52,6 +55,6 @@ public class FilmService {
         return filmList.stream().sorted(comparator)
                 .limit(count)
                 .collect(Collectors.toList());
-
+        //TODO не сортируется список
     }
 }

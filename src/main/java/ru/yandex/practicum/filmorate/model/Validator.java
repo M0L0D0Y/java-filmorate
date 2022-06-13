@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.time.LocalDate;
 
+@Component
 public class Validator {
 
-    private static final Validator INSTANCE  = new Validator();
+    private static final Validator INSTANCE = new Validator();
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
     private static final String EMPTY_STRING = "";
@@ -46,6 +48,6 @@ public class Validator {
     }
 
     public static Validator getValidator() {
-        return INSTANCE ;
+        return INSTANCE;
     }
 }
