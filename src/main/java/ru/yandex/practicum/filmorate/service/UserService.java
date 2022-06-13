@@ -23,12 +23,10 @@ public class UserService {
     public void addFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriendsUser;
-        listFriendsUser = user.getListFriends();
+        Set<Long> listFriendsUser = user.getListFriends();
         listFriendsUser.add(friendId);
         user.setListFriends(listFriendsUser);
-        Set<Long> listFriendsFriend;
-        listFriendsFriend = friend.getListFriends();
+        Set<Long> listFriendsFriend = friend.getListFriends();
         listFriendsFriend.add(id);
         friend.setListFriends(listFriendsFriend);
     }
@@ -36,12 +34,10 @@ public class UserService {
     public void deleteFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriendsUser;
-        listFriendsUser = user.getListFriends();
+        Set<Long> listFriendsUser = user.getListFriends();
         listFriendsUser.remove(friendId);
         user.setListFriends(listFriendsUser);
-        Set<Long> listFriendsFriend;
-        listFriendsFriend = friend.getListFriends();
+        Set<Long> listFriendsFriend = friend.getListFriends();
         listFriendsFriend.remove(id);
         friend.setListFriends(listFriendsFriend);
     }

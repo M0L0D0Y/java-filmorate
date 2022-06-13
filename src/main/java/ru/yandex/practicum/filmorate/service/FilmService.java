@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmComparator;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
@@ -33,7 +32,6 @@ public class FilmService {
         UsersWhoLiked.add(userId);
         film.setIdUsersWhoLiked(UsersWhoLiked);
         film.setLikes(UsersWhoLiked.size());
-        //TODO не ставятся лайки при первом проходе теста
     }
 
     public void deleteLike(long filmId, long userId) throws NotFoundException {
@@ -46,15 +44,13 @@ public class FilmService {
         UsersWhoLiked.remove(userId);
         film.setIdUsersWhoLiked(UsersWhoLiked);
         film.setLikes(UsersWhoLiked.size());
-        //TODO скорее всего не удаляются лайки
     }
 
     public List<Film> getMostPopularFilms(long count) {
-        FilmComparator comparator = new FilmComparator();
         List<Film> filmList = new LinkedList<>(memoryFilmStorage.getAllFilm());
-        return filmList.stream().sorted(comparator)
+        filmList.sort(Comparator.comparingInt(Film::getLikes).reversed());
+        return filmList.stream()
                 .limit(count)
                 .collect(Collectors.toList());
-        //TODO не сортируется список
     }
 }
