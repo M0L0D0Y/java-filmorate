@@ -19,10 +19,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
     private final Validator validator;
+    private final UserIdGenerator userIdGenerator;
 
     @Autowired
-    private InMemoryUserStorage(Validator validator) {
+    private InMemoryUserStorage(Validator validator, UserIdGenerator userIdGenerator) {
         this.validator = validator;
+        this.userIdGenerator = userIdGenerator;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) throws ValidationException {
         validator.validateUser(user);
-        user.setId(UserIdGenerator.generate());
+        user.setId(userIdGenerator.generate());
         users.put(user.getId(), user);
         return user;
     }

@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
-public class UserIdGenerator {
-    private static long id = 0;
+import org.springframework.stereotype.Component;
 
-    public static long generate() {
+@Component
+public class UserIdGenerator {
+    private long id = 0;
+
+    public long generate() {
         return ++id;
     }
 }

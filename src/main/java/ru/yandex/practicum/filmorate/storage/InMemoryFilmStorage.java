@@ -18,10 +18,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
     private final Validator validator;
-
+    private final FilmIdGenerator filmIdGenerator;
     @Autowired
-    private InMemoryFilmStorage(Validator validator) {
+    private InMemoryFilmStorage(Validator validator, FilmIdGenerator filmIdGenerator) {
         this.validator = validator;
+        this.filmIdGenerator = filmIdGenerator;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) throws ValidationException {
         validator.validateFilm(film);
-        film.setId(FilmIdGenerator.generate());
+        film.setId(filmIdGenerator.generate());
         films.put(film.getId(), film);
         return film;
     }
