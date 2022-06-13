@@ -7,15 +7,11 @@ import java.time.LocalDate;
 
 @Component
 public class Validator {
-
-    private static final Validator INSTANCE = new Validator();
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
     private static final String EMPTY_STRING = "";
     private static final String EMAIL_SYMBOL = "@";
 
-    private Validator() {
-    }
 
     public void validateFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
@@ -45,9 +41,5 @@ public class Validator {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем " + user.getBirthday());
         }
-    }
-
-    public static Validator getValidator() {
-        return INSTANCE;
     }
 }

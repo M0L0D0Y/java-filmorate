@@ -18,7 +18,7 @@ import java.util.Set;
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
-    private final Validator validator;// = Validator.getValidator();
+    private final Validator validator;
 
     @Autowired
     private InMemoryUserStorage(Validator validator) {

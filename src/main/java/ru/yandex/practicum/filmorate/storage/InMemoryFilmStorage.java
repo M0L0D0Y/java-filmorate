@@ -17,7 +17,7 @@ import java.util.Set;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
-    private final Validator validator;// = Validator.getValidator();
+    private final Validator validator;
 
     @Autowired
     private InMemoryFilmStorage(Validator validator) {
