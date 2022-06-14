@@ -19,6 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
     private final Validator validator;
     private final FilmIdGenerator filmIdGenerator;
+
     @Autowired
     private InMemoryFilmStorage(Validator validator, FilmIdGenerator filmIdGenerator) {
         this.validator = validator;

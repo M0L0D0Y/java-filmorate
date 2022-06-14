@@ -11,13 +11,11 @@ import java.util.*;
 
 @Service
 public class UserService {
-
     private final UserStorage memoryUserStorage;
 
     @Autowired
     public UserService(InMemoryUserStorage memoryUserStorage) {
         this.memoryUserStorage = memoryUserStorage;
-
     }
 
     public void addFriend(long id, long friendId) throws NotFoundException {

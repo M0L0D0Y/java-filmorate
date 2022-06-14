@@ -12,7 +12,6 @@ public class Validator {
     private static final String EMPTY_STRING = "";
     private static final String EMAIL_SYMBOL = "@";
 
-
     public void validateFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
             throw new ValidationException("Нет названия фильма " + film.getName());

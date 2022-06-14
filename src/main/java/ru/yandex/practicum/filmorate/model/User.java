@@ -9,7 +9,6 @@ import java.util.Set;
 
 @Data
 public class User {
-    private Set<Long> listFriends = new HashSet<>();
     private long id;
     @Email(message = "Почта должна быть правильного формата")
     private final String email;
@@ -18,4 +17,5 @@ public class User {
     private String name;
     @Past(message = "Дата рождения должна быть в прошлом")
     private final LocalDate birthday;
+    private Set<Long> listFriends = new HashSet<>();
 }

@@ -28,27 +28,25 @@ public class FilmService {
     public void addLikeFilm(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
         User user = memoryUserStorage.getUser(userId);//для проверки существования такого id пользователя
-        Set<Long> UsersWhoLiked = film.getIdUsersWhoLiked();
-        UsersWhoLiked.add(userId);
-        film.setIdUsersWhoLiked(UsersWhoLiked);
-        film.setLikes(UsersWhoLiked.size());
+        Set<Long> usersWhoLiked = film.getLikedUsers();
+        usersWhoLiked.add(userId);
+        film.setLikedUsers(usersWhoLiked);
     }
 
     public void deleteLike(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
-        Set<Long> UsersWhoLiked;
-        UsersWhoLiked = film.getIdUsersWhoLiked();
-        if (!(UsersWhoLiked.contains(userId))) {
+        Set<Long> usersWhoLiked;
+        usersWhoLiked = film.getLikedUsers();
+        if (!(usersWhoLiked.contains(userId))) {
             throw new NotFoundException("нет пользователя с таким Id " + userId);
         }
-        UsersWhoLiked.remove(userId);
-        film.setIdUsersWhoLiked(UsersWhoLiked);
-        film.setLikes(UsersWhoLiked.size());
+        usersWhoLiked.remove(userId);
+        film.setLikedUsers(usersWhoLiked);
     }
 
     public List<Film> getMostPopularFilms(long count) {
         List<Film> filmList = new LinkedList<>(memoryFilmStorage.getAllFilm());
-        filmList.sort(Comparator.comparingInt(Film::getLikes).reversed());
+        filmList.sort(Comparator.comparingInt(o -> o.getLikedUsers().size() * (-1)));//reversed() почему-то не работает
         return filmList.stream()
                 .limit(count)
                 .collect(Collectors.toList());

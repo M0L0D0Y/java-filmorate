@@ -15,25 +15,24 @@ import java.util.List;
 
 @Slf4j
 @RestController
-
 public class FilmController {
     private final FilmService filmService;
-    private final FilmStorage memoryFilmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmController(FilmService filmService, FilmStorage memoryFilmStorage) {
+    public FilmController(FilmService filmService, FilmStorage filmStorage) {
         this.filmService = filmService;
-        this.memoryFilmStorage = memoryFilmStorage;
+        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
-        return memoryFilmStorage.getAllFilm();
+        return filmStorage.getAllFilm();
     }
 
     @GetMapping(value = "/films/{id}")
     public void getFilm(@PathVariable long id) throws NotFoundException {
-        memoryFilmStorage.getFilm(id);
+        filmStorage.getFilm(id);
     }
 
     @GetMapping(value = "/films/popular")
@@ -44,12 +43,12 @@ public class FilmController {
 
     @PostMapping(value = "/films")
     public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        return memoryFilmStorage.addFilm(film);
+        return filmStorage.addFilm(film);
     }
 
     @PutMapping(value = "/films")
     public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException, NotFoundException {
-        return memoryFilmStorage.updateFilm(film);
+        return filmStorage.updateFilm(film);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
@@ -59,7 +58,7 @@ public class FilmController {
 
     @DeleteMapping(value = "/films")
     public void deleteFilm(@RequestParam long id) throws NotFoundException {
-        memoryFilmStorage.deleteFilm(id);
+        filmStorage.deleteFilm(id);
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
