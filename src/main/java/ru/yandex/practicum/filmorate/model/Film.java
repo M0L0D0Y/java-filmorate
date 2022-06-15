@@ -1,14 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
-    private final long id = FilmIdGenerator.generate();
+    private long id;
     @NotEmpty(message = "Нет названия фильма")
     private final String name;
     @NotEmpty(message = "Нет описания фильма")
@@ -17,4 +18,5 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
     private final int duration;
+    private Set<Long> likedUsers = new HashSet<>();
 }
