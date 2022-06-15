@@ -35,8 +35,7 @@ public class FilmService {
 
     public void deleteLike(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);
-        Set<Long> usersWhoLiked;
-        usersWhoLiked = film.getLikedUsers();
+        Set<Long> usersWhoLiked = film.getLikedUsers();
         if (!(usersWhoLiked.contains(userId))) {
             throw new NotFoundException("нет пользователя с таким Id " + userId);
         }

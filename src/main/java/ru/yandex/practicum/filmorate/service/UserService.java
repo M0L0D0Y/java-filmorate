@@ -21,29 +21,29 @@ public class UserService {
     public void addFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriendsUser = user.getListFriends();
+        Set<Long> listFriendsUser = user.getFriendsList();
         listFriendsUser.add(friendId);
-        user.setListFriends(listFriendsUser);
-        Set<Long> listFriendsFriend = friend.getListFriends();
+        user.setFriendsList(listFriendsUser);
+        Set<Long> listFriendsFriend = friend.getFriendsList();
         listFriendsFriend.add(id);
-        friend.setListFriends(listFriendsFriend);
+        friend.setFriendsList(listFriendsFriend);
     }
 
     public void deleteFriend(long id, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(id);
         User friend = memoryUserStorage.getUser(friendId);
-        Set<Long> listFriendsUser = user.getListFriends();
+        Set<Long> listFriendsUser = user.getFriendsList();
         listFriendsUser.remove(friendId);
-        user.setListFriends(listFriendsUser);
-        Set<Long> listFriendsFriend = friend.getListFriends();
+        user.setFriendsList(listFriendsUser);
+        Set<Long> listFriendsFriend = friend.getFriendsList();
         listFriendsFriend.remove(id);
-        friend.setListFriends(listFriendsFriend);
+        friend.setFriendsList(listFriendsFriend);
     }
 
     public List<User> getListFriend(long id) throws NotFoundException {
         List<User> friends = new ArrayList<>();
         User user = memoryUserStorage.getUser(id);
-        Set<Long> listIdFriends = user.getListFriends();
+        Set<Long> listIdFriends = user.getFriendsList();
         if (listIdFriends.isEmpty()) {
             return friends;
         }
@@ -54,8 +54,8 @@ public class UserService {
     }
 
     public List<User> getCommonUsers(long id, long friendId) throws NotFoundException {
-        List<Long> userListFriend = new LinkedList<>(memoryUserStorage.getUser(id).getListFriends());
-        List<Long> friendListFriend = new LinkedList<>(memoryUserStorage.getUser(friendId).getListFriends());
+        List<Long> userListFriend = new LinkedList<>(memoryUserStorage.getUser(id).getFriendsList());
+        List<Long> friendListFriend = new LinkedList<>(memoryUserStorage.getUser(friendId).getFriendsList());
         List<User> commonFriends = new LinkedList<>();
         userListFriend.retainAll(friendListFriend);
         for (long value : userListFriend) {
