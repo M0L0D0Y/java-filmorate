@@ -5,11 +5,14 @@ import lombok.Data;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
 public class Film {
     private long id;
+    private Set<Genre> genre = new HashSet<>();//добавить  @NotEmpty(message = "Нет жанра")
+    private Rating rating;//добавить @NotEmpty(message = "Нет рейтинга")
     @NotEmpty(message = "Нет названия фильма")
     private final String name;
     @NotEmpty(message = "Нет описания фильма")
