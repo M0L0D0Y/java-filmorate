@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -20,7 +21,8 @@ public class FilmService {
     private final UserStorage memoryUserStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage memoryFilmStorage, InMemoryUserStorage memoryUserStorage) {
+    public FilmService(@Qualifier("InDataBaseFilm") FilmStorage memoryFilmStorage,
+                       @Qualifier("InDataBaseUser") UserStorage memoryUserStorage) {
         this.memoryFilmStorage = memoryFilmStorage;
         this.memoryUserStorage = memoryUserStorage;
     }

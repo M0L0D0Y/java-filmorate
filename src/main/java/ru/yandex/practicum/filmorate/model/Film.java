@@ -11,8 +11,6 @@ import java.util.Set;
 @Data
 public class Film {
     private long id;
-    private Set<Genre> genre = new HashSet<>();//добавить  @NotEmpty(message = "Нет жанра")
-    private Rating rating;//добавить @NotEmpty(message = "Нет рейтинга")
     @NotEmpty(message = "Нет названия фильма")
     private final String name;
     @NotEmpty(message = "Нет описания фильма")
@@ -21,5 +19,9 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
     private final int duration;
+    @NotEmpty(message = "Нет жанра")
+    private Set<Genre> genre = new HashSet<>();
+    @NotEmpty(message = "Нет рейтинга")
+    private Rating rating;
     private Set<Long> likedUsers = new HashSet<>();
 }

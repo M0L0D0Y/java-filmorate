@@ -4,7 +4,9 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -22,5 +24,6 @@ public class User {
      * неподтверждённая — когда один пользователь отправил запрос на добавление другого пользователя в друзья,
      * подтверждённая — когда второй пользователь согласился на добавление.
      */
+    //private Map<Long, Boolean> statusFriendship = new HashMap<>();//key-id пользователя, value- false или true
     private Set<Long> friendsList  = new HashSet<>();
 }
