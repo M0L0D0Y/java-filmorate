@@ -17,7 +17,7 @@ FROM users;
 Получение топ N наиболее популярных фильмов
 ```
 SELECT *
-FROM film
+FROM films
 WHERE film_id IN (
     SELECT film_id,
     COUNT (user_id)

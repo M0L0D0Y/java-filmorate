@@ -19,9 +19,4 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
     private final int duration;
-    @NotEmpty(message = "Нет жанра")
-    private Set<Genre> genre = new HashSet<>();
-    @NotEmpty(message = "Нет рейтинга")
-    private Rating rating;
-    private Set<Long> likedUsers = new HashSet<>();
 }

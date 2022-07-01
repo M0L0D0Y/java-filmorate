@@ -57,9 +57,9 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) throws ValidationException, NotFoundException {
         validator.validateFilm(film);
         String query = "UPDATE 'films' SET film_name=?, film_description=?,film_releaseDate=?, " +
-                "film_duration=?, film_rating=? WHERE user_id=?";
+                "film_duration=? WHERE user_id=?";
         jdbcTemplate.update(query, film.getName(), film.getDescription(), film.getReleaseDate(),
-                film.getDuration(), film.getRating());
+                film.getDuration());
         log.info("Фильм с id = {} обновлен", film.getId());
         return film;
     }

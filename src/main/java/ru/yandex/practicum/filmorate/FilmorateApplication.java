@@ -9,5 +9,5 @@ public class FilmorateApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FilmorateApplication.class, args);
 	}
-//TODO РАСПИСАТЬ ВСЕ ТАБЛИЧКИ НА КЛАССЫ
+//TODO доделать сервис для фильмов и юзеров
 }
