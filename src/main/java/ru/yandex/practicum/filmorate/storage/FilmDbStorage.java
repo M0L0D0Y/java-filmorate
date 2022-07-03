@@ -30,7 +30,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilm() {
-        String query = "SELECT * FROM 'films'";
+        String query = "SELECT * FROM FILMS";
         log.info("Все фильмы получены");
         return jdbcTemplate.query(
                 query,
@@ -41,7 +41,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film addFilm(Film film) throws ValidationException {
         validator.validateFilm(film);
         film.setId(filmIdGenerator.generate());
-        String query = "INSERT INTO 'films' VALUES(?, ?, ?, ?, ?)";
+        String query = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION) VALUES(?, ?, ?, ?)";
         jdbcTemplate.update(query, film.getId(), film.getName(), film.getDescription(),
                 film.getReleaseDate(), film.getDuration());
         log.info("Фильм с id = {} добавлен", film.getId());
@@ -50,7 +50,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(long id) throws NotFoundException {//TODO МДЕЛАТЬ ПРОВЕРКУ НА СУЩЕСТВОВАНИЕ ID
-        String query = "DELETE  FROM 'films' WHERE 'film_id' = ?";
+        String query = "DELETE  FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(query, id);
         log.info("Фильм с id = {} удален", id);
     }
@@ -58,8 +58,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) throws ValidationException, NotFoundException {
         validator.validateFilm(film);
-        String query = "UPDATE 'films' SET film_name=?, film_description=?,film_releaseDate=?, " +
-                "film_duration=? WHERE user_id=?";
+        String query = "UPDATE FILMS SET NAME=?, DESCRIPTION=?,RELEASE_DATE=?, " +
+                "DURATION=? WHERE FILM_ID=?";
         jdbcTemplate.update(query, film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration());
         log.info("Фильм с id = {} обновлен", film.getId());
@@ -68,11 +68,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(long id) throws NotFoundException {
-        String query = "SELECT * FROM 'films' WHERE 'user_id' = ?";
+        String query = "SELECT * FROM FILMS WHERE FILM_ID = ?";
         Film film = jdbcTemplate.query(
                         query,
-                        new Object[]{id},
-                        new BeanPropertyRowMapper<>(Film.class))
+                        new BeanPropertyRowMapper<>(Film.class),
+                        id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + id + " не найден."));
@@ -80,18 +80,18 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
     public Collection<Genre> getAllGenres(){
-        String query = "SELECT * FROM 'genres'";
+        String query = "SELECT * FROM GENRES";
         log.info("Все жанры получены");
         return jdbcTemplate.query(
                 query,
                 new BeanPropertyRowMapper<>(Genre.class));
     }
     public Genre getGenreById(int genreID){
-        String query = "SELECT * FROM 'genres' WHERE 'genres_id' = ?";
+        String query = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
         log.info("Жанр с id = {} удален", genreID);
         Genre genre = jdbcTemplate.query(query,
-                new Object[]{genreID},
-                new BeanPropertyRowMapper<>(Genre.class))
+                new BeanPropertyRowMapper<>(Genre.class),
+                genreID)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + genreID + " не найден."));
@@ -100,17 +100,17 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Collection<Rating> getAllRating(){
-        String query = "SELECT * FROM 'rating'";
+        String query = "SELECT * FROM RATING";
         log.info("Все рейтинги получены");
         return jdbcTemplate.query(
                 query,
                 new BeanPropertyRowMapper<>(Rating.class));
     }
     public Rating getRatingById(int ratingId){
-        String query = "SELECT * FROM 'rating' WHERE 'rating_id' = ?";
+        String query = "SELECT * FROM RATING WHERE RATING_ID = ?";
         Rating rating = jdbcTemplate.query(query,
-                        new Object[]{ratingId},
-                        new BeanPropertyRowMapper<>(Rating.class))
+                        new BeanPropertyRowMapper<>(Rating.class),
+                        ratingId)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + ratingId + " не найден."));

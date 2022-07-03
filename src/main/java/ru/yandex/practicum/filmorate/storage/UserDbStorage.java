@@ -37,18 +37,19 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user) throws ValidationException {
         validator.validateUser(user);
-        System.out.println(user);
-        //user.setId(userIdGenerator.generate());
-        String query = "INSERT INTO 'users' (email, login, name, birthday) VALUES(?, ?, ?, ?)";
-        jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        log.info("Пользователь с id = {} добавлен", user.getId());
-        return user;
-
+        String sqlQuery = "INSERT INTO USERS(EMAIL, LOGIN, NAME, BIRTHDAY) " +
+                "VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sqlQuery,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday());
+        return user;//TODO ДОРАБОТАТЬ ВОЗВРАТ С ID
     }
 
     @Override
     public void deleteUser(long id) throws NotFoundException {
-        String query = "DELETE  FROM 'users' WHERE 'user_id' = ?";
+        String query = "DELETE  FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(query, id);
         log.info("Пользователь с id = {} удален", id);
     }
@@ -56,7 +57,8 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) throws NotFoundException, ValidationException {
         validator.validateUser(user);
-        String query = "UPDATE 'users' SET user_email=?, user_login=?, user_name=?, user_birthday=? WHERE user_id=?";
+        String query = "UPDATE USERS SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=?" +
+                " WHERE USER_ID=?";
         jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         log.info("Пользователь с id = {} обновлен", user.getId());
         return user;
@@ -64,12 +66,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUser(long id) throws NotFoundException {
-        String query = "SELECT * FROM 'users' WHERE 'user_id' = ?";
+        String query = "SELECT * FROM USERS WHERE USER_ID = ?";
 
         User user = jdbcTemplate.query(
                         query,
-                        new Object[]{id},
-                        new BeanPropertyRowMapper<>(User.class))
+                        new BeanPropertyRowMapper<>(User.class),
+                        id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));

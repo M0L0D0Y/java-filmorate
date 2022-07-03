@@ -1,70 +1,70 @@
-CREATE TABLE IF NOT EXISTS "users" (
-  "user_id" long auto_increment PRIMARY KEY,
-  "email" varchar UNIQUE NOT NULL,
-  "login" varchar NOT NULL,
-  "name" varchar,
-  "birthday" date NOT NULL
+CREATE TABLE IF NOT EXISTS "USERS" (
+  "USER_ID"  int auto_increment  primary key not null ,
+  "EMAIL" varchar UNIQUE NOT NULL,
+  "LOGIN" varchar NOT NULL,
+  "NAME" varchar,
+  "BIRTHDAY" date NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "films" (
-  "film_id" long auto_increment PRIMARY KEY NOT NULL,
-  "name" varchar NOT NULL,
-  "description" varchar NOT NULL,
-  "release_date" date NOT NULL,
-  "duration" int NOT NULL
+CREATE TABLE IF NOT EXISTS "FILMS" (
+  "FILM_ID" int auto_increment  primary key not null ,
+  "NAME" varchar NOT NULL,
+  "DESCRIPTION" varchar NOT NULL,
+  "RELEASE_DATE" date NOT NULL,
+  "DURATION" int NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "film_genre" (
-  "film_id" long PRIMARY KEY,
-  "genre_id" int NOT NULL
+CREATE TABLE IF NOT EXISTS "FILM_GENRE" (
+  "FILM_ID" int PRIMARY KEY,
+  "GENRE_ID" int NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "genres" (
-  "genre_id" int auto_increment PRIMARY KEY,
-  "name" varchar NOT NULL
+CREATE TABLE IF NOT EXISTS "GENRES" (
+  "GENRE_ID" int  PRIMARY KEY,
+  "NAME" varchar NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "film_rating" (
-  "film_id" long PRIMARY KEY,
-  "rating_id" int
+CREATE TABLE IF NOT EXISTS "FILM_RATING" (
+  "FILM_ID" int PRIMARY KEY,
+  "RATING_ID" int
 );
 
-CREATE TABLE IF NOT EXISTS "rating" (
-  "rating_id" int auto_increment PRIMARY KEY,
-  "name" varchar NOT NULL
+CREATE TABLE IF NOT EXISTS "RATING" (
+  "RATING_ID" int PRIMARY KEY,
+  "NAME" varchar NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS "film_liked_users" (
-  "film_id" long PRIMARY KEY,
-  "user_id" long
+CREATE TABLE IF NOT EXISTS "FILM_LIKED_USERS" (
+  "FILM_ID" int PRIMARY KEY,
+  "USER_ID" int
 );
 
-CREATE TABLE IF NOT EXISTS "friendship" (
-  "user_id" long,
-  "friend_id" long,
-  "status_id" int
+CREATE TABLE IF NOT EXISTS "FRIENDSHIP" (
+  "USER_ID" int,
+  "FRIEND_ID" long,
+  "STATUS_ID" int
 );
 
-CREATE TABLE IF NOT EXISTS "status_friendship" (
-  "status_id" int PRIMARY KEY auto_increment,
-  "name" varchar NOT NULL
+CREATE TABLE IF NOT EXISTS "STATUS_FRIENDSHIP" (
+  "STATUS_ID" int PRIMARY KEY,
+  "NAME" varchar NOT NULL
 );
 
 
-ALTER TABLE "film_genre" ADD FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");
+ALTER TABLE "FILM_GENRE" ADD FOREIGN KEY ("FILM_ID") REFERENCES "FILMS" ("FILM_ID");
 
-ALTER TABLE "film_genre" ADD FOREIGN KEY ("genre_id") REFERENCES "genres" ("genre_id");
+ALTER TABLE "FILM_GENRE" ADD FOREIGN KEY ("GENRE_ID") REFERENCES "GENRES" ("GENRE_ID");
 
-ALTER TABLE "film_rating" ADD FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");
+ALTER TABLE "FILM_RATING" ADD FOREIGN KEY ("FILM_ID") REFERENCES "FILMS" ("FILM_ID");
 
-ALTER TABLE "film_rating" ADD FOREIGN KEY ("rating_id") REFERENCES "rating" ("rating_id");
+ALTER TABLE "FILM_RATING" ADD FOREIGN KEY ("RATING_ID") REFERENCES "RATING" ("RATING_ID");
 
-ALTER TABLE "film_liked_users" ADD FOREIGN KEY ("film_id") REFERENCES "films" ("film_id");
+ALTER TABLE "FILM_LIKED_USERS" ADD FOREIGN KEY ("FILM_ID") REFERENCES "FILMS" ("FILM_ID");
 
-ALTER TABLE "film_liked_users" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
+ALTER TABLE "FILM_LIKED_USERS" ADD FOREIGN KEY ("USER_ID") REFERENCES "USERS" ("USER_ID");
 
-ALTER TABLE "friendship" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
+ALTER TABLE "FRIENDSHIP" ADD FOREIGN KEY ("USER_ID") REFERENCES "USERS" ("USER_ID");
 
-ALTER TABLE "friendship" ADD FOREIGN KEY ("friend_id") REFERENCES "users" ("user_id");
+ALTER TABLE "FRIENDSHIP" ADD FOREIGN KEY ("FRIEND_ID") REFERENCES "USERS" ("USER_ID");
 
-ALTER TABLE "friendship" ADD FOREIGN KEY ("status_id") REFERENCES "status_friendship" ("status_id");
+ALTER TABLE "FRIENDSHIP" ADD FOREIGN KEY ("STATUS_ID") REFERENCES "STATUS_FRIENDSHIP" ("STATUS_ID");

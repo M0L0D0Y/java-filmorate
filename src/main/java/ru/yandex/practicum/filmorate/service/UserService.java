@@ -30,21 +30,21 @@ public class UserService {
     public void addFriend(long userId, long friendId) throws NotFoundException {
         User user = memoryUserStorage.getUser(userId);//для проверки существования таких ползователей
         User friend = memoryUserStorage.getUser(friendId);
-
-        String query = "SELECT friend_id FROM 'friendship' WHERE user_id = ? AND status_id = ?";
+        String query = "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ? AND STATUS_ID = ?";
         List<Long> foundIdFriends = jdbcTemplate.query(
-                        query,
-                        new Object[]{friendId, 1},
-                        new BeanPropertyRowMapper<>(Long.class));
+                query,
+                new BeanPropertyRowMapper<>(Long.class),
+                friendId,
+                1);
         if (foundIdFriends.contains(userId)) {
-            String queryForConfirmFriendship1 = "INSERT INTO 'friendship' VALUES(?, ?, ?)";
+            String queryForConfirmFriendship1 = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
             jdbcTemplate.update(queryForConfirmFriendship1, userId, friendId, 2);
-            String queryForConfirmFriendship2 = "UPDATE 'friendship' SET status_id =? " +
-                    "WHERE user_id = ? AND friend_id =?";
+            String queryForConfirmFriendship2 = "UPDATE FRIENDSHIP SET STATUS_ID =? " +
+                    "WHERE USER_ID = ? AND FRIEND_ID =?";
             jdbcTemplate.update(queryForConfirmFriendship2, 2, friendId, userId);
             log.info("Дружба между пользователсями с id {} и {} подтверждена", userId, friendId);
         } else {
-            String queryForRequestFriendship = "INSERT INTO 'friendship' VALUES(?, ?, ?)";
+            String queryForRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
             jdbcTemplate.update(queryForRequestFriendship, userId, friendId, 1);
             log.info("Пользователь с id {} отправил запрос на дружбу пользователю с id {}", userId, friendId);
         }
@@ -72,43 +72,44 @@ public class UserService {
             return listFriend;
         }*/
 
-        String query = "SELECT * FROM users WHERE user_id IN(SELECT * FROM (SELECT friend_id FROM (" +
-                "SELECT friend_id FROM friendship WHERE user_id = ?)))";
+        String query = "SELECT * FROM USERS WHERE USER_ID IN(SELECT * FROM (SELECT FRIEND_ID FROM (" +
+                "SELECT FRIEND_ID FROM friendship WHERE USER_ID = ?)))";
         List<User> friends = jdbcTemplate.query(
                 query,
-                new Object[]{id},
-                new BeanPropertyRowMapper<>(User.class));
+                new BeanPropertyRowMapper<>(User.class),
+                id);
         log.info("Получили список друзей пользователя с id {}", id);
         return friends;
     }
 
     public List<User> getCommonUsers(long id, long friendId) throws NotFoundException {
-        String query= "SELECT *\n" +
-                "FROM users\n" +
-                "WHERE user_id IN(\n" +
+        String query = "SELECT *\n" +
+                "FROM USERS\n" +
+                "WHERE USER_ID IN(\n" +
                 "    SELECT *\n" +
                 "    FROM (\n" +
-                "        SELECT friend_id\n" +
+                "        SELECT FRIEND_ID\n" +
                 "        FROM (\n" +
-                "            SELECT friend_id\n" +
+                "            SELECT FRIEND_ID\n" +
                 "            FROM friendship\n" +
-                "            WHERE user_id = ?\n" +
-                "            AND status_id IN(\n" +
-                "                SELECT status_id\n" +
+                "            WHERE USERS.USER_ID = ?\n" +
+                "            AND STATUS_ID IN(\n" +
+                "                SELECT STATUS_ID\n" +
                 "                FROM status_friendship\n" +
-                "                WHERE name = \"подтверждена\"))\n" +
-                "        WHERE friend_id IN (\n" +
-                "            SELECT friend_id\n" +
+                "                WHERE STATUS_FRIENDSHIP.NAME = 'подтверждена'))\n" +
+                "        WHERE FRIEND_ID IN (\n" +
+                "            SELECT FRIENDSHIP.FRIEND_ID\n" +
                 "            FROM friendship\n" +
-                "            WHERE user_id = ?\n" +
-                "            AND status_id IN(\n" +
-                "                SELECT status_id\n" +
-                "                FROM status_friendship\n" +
-                "                WHERE name = \"подтверждена\"))));";
+                "            WHERE USER_ID = ?\n" +
+                "            AND STATUS_ID IN(\n" +
+                "                SELECT STATUS_ID\n" +
+                "                FROM STATUS_FRIENDSHIP\n" +
+                "                WHERE NAME = 'подтверждена'))));";
         List<User> commonFriends = jdbcTemplate.query(
                 query,
-                new Object[]{id, friendId},
-                new BeanPropertyRowMapper<>(User.class));
+                new BeanPropertyRowMapper<>(User.class),
+                id,
+                friendId);
         log.info("Получили список общих друзей пользователей с id {} и {}", id, friendId);
         return commonFriends;
     }
