@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.Validator;
-import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
 import java.util.Collection;
 
@@ -18,12 +17,10 @@ public class UserDbStorage implements UserStorage {
 
     private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
     private final Validator validator;
-    private final UserIdGenerator userIdGenerator;
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(Validator validator, UserIdGenerator userIdGenerator, JdbcTemplate jdbcTemplate) {
+    public UserDbStorage(Validator validator, JdbcTemplate jdbcTemplate) {
         this.validator = validator;
-        this.userIdGenerator = userIdGenerator;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -40,11 +37,13 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addUser(User user) throws ValidationException {
         validator.validateUser(user);
-        user.setId(userIdGenerator.generate());
-        String query = "INSERT INTO 'users' VALUES(?, ?, ?, ?, ?)";
-        jdbcTemplate.update(query, user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        System.out.println(user);
+        //user.setId(userIdGenerator.generate());
+        String query = "INSERT INTO 'users' (email, login, name, birthday) VALUES(?, ?, ?, ?)";
+        jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         log.info("Пользователь с id = {} добавлен", user.getId());
         return user;
+
     }
 
     @Override
@@ -57,7 +56,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) throws NotFoundException, ValidationException {
         validator.validateUser(user);
-        String query = "UPDATE 'users' SET user_email=?, user_login=?,user_name=?, user_birthday=? WHERE user_id=?";
+        String query = "UPDATE 'users' SET user_email=?, user_login=?, user_name=?, user_birthday=? WHERE user_id=?";
         jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         log.info("Пользователь с id = {} обновлен", user.getId());
         return user;
@@ -66,13 +65,15 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUser(long id) throws NotFoundException {
         String query = "SELECT * FROM 'users' WHERE 'user_id' = ?";
-        log.info("Пользователь с идентификатором {} найден.", id);
-        return jdbcTemplate.query(
+
+        User user = jdbcTemplate.query(
                         query,
                         new Object[]{id},
                         new BeanPropertyRowMapper<>(User.class))
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));
+        log.info("Пользователь с идентификатором {} найден.", id);
+        return user;
     }
 }

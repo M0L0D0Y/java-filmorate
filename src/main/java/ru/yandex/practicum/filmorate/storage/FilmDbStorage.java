@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.Validator;
 import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
 
@@ -47,7 +49,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(long id) throws NotFoundException {
+    public void deleteFilm(long id) throws NotFoundException {//TODO МДЕЛАТЬ ПРОВЕРКУ НА СУЩЕСТВОВАНИЕ ID
         String query = "DELETE  FROM 'films' WHERE 'film_id' = ?";
         jdbcTemplate.update(query, id);
         log.info("Фильм с id = {} удален", id);
@@ -67,13 +69,52 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilm(long id) throws NotFoundException {
         String query = "SELECT * FROM 'films' WHERE 'user_id' = ?";
-        log.info("Пользователь с идентификатором {} найден.", id);
-        return jdbcTemplate.query(
+        Film film = jdbcTemplate.query(
                         query,
                         new Object[]{id},
                         new BeanPropertyRowMapper<>(Film.class))
                 .stream()
                 .findAny()
-                .orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + id + " не найден."));
+        log.info("Фильм с идентификатором {} найден.", id);
+        return film;
+    }
+    public Collection<Genre> getAllGenres(){
+        String query = "SELECT * FROM 'genres'";
+        log.info("Все жанры получены");
+        return jdbcTemplate.query(
+                query,
+                new BeanPropertyRowMapper<>(Genre.class));
+    }
+    public Genre getGenreById(int genreID){
+        String query = "SELECT * FROM 'genres' WHERE 'genres_id' = ?";
+        log.info("Жанр с id = {} удален", genreID);
+        Genre genre = jdbcTemplate.query(query,
+                new Object[]{genreID},
+                new BeanPropertyRowMapper<>(Genre.class))
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + genreID + " не найден."));
+        log.info("Жанр с id = {} удален", genreID);
+        return genre;
+    }
+
+    public Collection<Rating> getAllRating(){
+        String query = "SELECT * FROM 'rating'";
+        log.info("Все рейтинги получены");
+        return jdbcTemplate.query(
+                query,
+                new BeanPropertyRowMapper<>(Rating.class));
+    }
+    public Rating getRatingById(int ratingId){
+        String query = "SELECT * FROM 'rating' WHERE 'rating_id' = ?";
+        Rating rating = jdbcTemplate.query(query,
+                        new Object[]{ratingId},
+                        new BeanPropertyRowMapper<>(Rating.class))
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + ratingId + " не найден."));
+        log.info("Рейтинг с id = {} получен", ratingId);
+        return rating;
     }
 }
