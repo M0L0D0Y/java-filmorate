@@ -12,11 +12,11 @@ import java.util.Set;
 public class Film {
     private long id;
     @NotEmpty(message = "Нет названия фильма")
-    private final String name;
+    private String name;
     @NotEmpty(message = "Нет описания фильма")
-    private final String description;
+    private String description;
     @Past(message = "Дата релиза не может быть в будущем")
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
-    private final int duration;
+    private int duration;
 }

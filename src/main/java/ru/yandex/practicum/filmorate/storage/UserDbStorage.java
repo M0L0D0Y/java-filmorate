@@ -2,15 +2,16 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.Validator;
 
 import java.util.Collection;
+import java.util.List;
 
 @Component("InDataBaseUser")
 public class UserDbStorage implements UserStorage {
@@ -26,12 +27,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUser() {
-        String query = "SELECT * FROM 'users'";
-        log.info("Все пользователи получены");
-        return jdbcTemplate.query(
+        String query = "SELECT * FROM USERS";
+        List<User> userList = jdbcTemplate.query(
                 query,
-                new BeanPropertyRowMapper<>(User.class));
-
+                new UserMapper());
+        log.info("Все пользователи получены");
+        return userList;
     }
 
     @Override
@@ -44,11 +45,19 @@ public class UserDbStorage implements UserStorage {
                 user.getLogin(),
                 user.getName(),
                 user.getBirthday());
-        return user;//TODO ДОРАБОТАТЬ ВОЗВРАТ С ID
+        String queryForReturnUser = "SELECT * FROM USERS WHERE EMAIL = ?";
+        return jdbcTemplate.query(queryForReturnUser,
+                        new UserMapper(),
+                        user.getEmail())
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Ошибка вставки. " +
+                        "Пользователь с email " + user.getEmail() + " не найден."));
     }
 
     @Override
     public void deleteUser(long id) throws NotFoundException {
+        User checkUser = getUser(id);//проверка существования такого id
         String query = "DELETE  FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(query, id);
         log.info("Пользователь с id = {} удален", id);
@@ -57,9 +66,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) throws NotFoundException, ValidationException {
         validator.validateUser(user);
+        User checkUser = getUser(user.getId());//проверка существования такого id
         String query = "UPDATE USERS SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=?" +
                 " WHERE USER_ID=?";
-        jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        jdbcTemplate.update(query, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         log.info("Пользователь с id = {} обновлен", user.getId());
         return user;
     }
@@ -67,10 +77,9 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUser(long id) throws NotFoundException {
         String query = "SELECT * FROM USERS WHERE USER_ID = ?";
-
         User user = jdbcTemplate.query(
                         query,
-                        new BeanPropertyRowMapper<>(User.class),
+                        new UserMapper(),
                         id)
                 .stream()
                 .findAny()

@@ -25,7 +25,7 @@ class ValidatorTest {
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
 
-    private static void validationUser(User user) throws ValidationException {
+    /*private static void validationUser(User user) throws ValidationException {
         if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
             throw new ValidationException("Неправильный формат почты " + user.getEmail());
         }
@@ -168,5 +168,5 @@ class ValidatorTest {
         assertEquals("Продолжительность фильма не может быть отрицательной", violations.iterator().next().getMessage());
         assertThrows(ValidationException.class, () -> validationFilm(film),
                 "Продолжительность фильма меньше нуля " + film.getDuration());
-    }
+    }*/
 }
