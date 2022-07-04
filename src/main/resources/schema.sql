@@ -1,17 +1,17 @@
 CREATE TABLE IF NOT EXISTS "USERS"
 (
     "USER_ID"  int auto_increment primary key unique not null,
-    "EMAIL"    varchar(20) UNIQUE             NOT NULL,
-    "LOGIN"    varchar(20)                    NOT NULL,
-    "NAME"     varchar(20)                    NOT NULL,
-    "BIRTHDAY" date                           NOT NULL
+    "EMAIL"    varchar(20) UNIQUE                    NOT NULL,
+    "LOGIN"    varchar(20)                           NOT NULL,
+    "NAME"     varchar(20)                           NOT NULL,
+    "BIRTHDAY" date                                  NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "FILMS"
 (
     "FILM_ID"      int auto_increment primary key not null,
     "NAME"         varchar(20)                    NOT NULL,
-    "DESCRIPTION"  varchar(200)                   NOT NULL,
+    "DESCRIPTION"  varchar(200) unique            NOT NULL,
     "RELEASE_DATE" date                           NOT NULL,
     "DURATION"     int                            NOT NULL
 );
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "FILMS"
 CREATE TABLE IF NOT EXISTS "FILM_GENRE"
 (
     "FILM_ID"  int PRIMARY KEY,
-    "GENRE_ID" int NOT NULL
+    "GENRE_ID" int
 );
 
 CREATE TABLE IF NOT EXISTS "GENRES"
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "GENRES"
 CREATE TABLE IF NOT EXISTS "FILM_RATING"
 (
     "FILM_ID"   int PRIMARY KEY,
-    "RATING_ID" int
+    "RATING_ID" int not null
 );
 
 CREATE TABLE IF NOT EXISTS "RATING"
