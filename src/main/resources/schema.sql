@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "FILMS"
 (
     "FILM_ID"      int auto_increment primary key not null,
     "NAME"         varchar(20)                    NOT NULL,
-    "DESCRIPTION"  varchar(200) unique            NOT NULL,
+    "DESCRIPTION"  varchar(200)                   NOT NULL,
     "RELEASE_DATE" date                           NOT NULL,
     "DURATION"     int                            NOT NULL
 );
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS "FILM_GENRE"
 CREATE TABLE IF NOT EXISTS "GENRES"
 (
     "GENRE_ID" int auto_increment primary key not null,
-    "NAME"     varchar(20)                    NOT NULL
+    "NAME"     varchar(20)              NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "FILM_RATING"
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "FILM_RATING"
 CREATE TABLE IF NOT EXISTS "RATING"
 (
     "RATING_ID" int auto_increment primary key not null,
-    "NAME"      varchar(20)                    NOT NULL
+    "NAME"      varchar(20)              NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "FILM_LIKED_USERS"
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS "FRIENDSHIP"
 CREATE TABLE IF NOT EXISTS "STATUS_FRIENDSHIP"
 (
     "STATUS_ID" int auto_increment primary key not null,
-    "NAME"      varchar                        NOT NULL
+    "NAME"      varchar                  NOT NULL
 );
 
 

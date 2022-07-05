@@ -33,8 +33,8 @@ public class FilmController {
     }
 
     @GetMapping(value = "/films/{id}")
-    public void getFilm(@PathVariable long id) throws NotFoundException {
-        filmStorage.getFilm(id);
+    public Film getFilm(@PathVariable long id) throws NotFoundException {
+        return filmStorage.getFilm(id);
     }
 
     @GetMapping(value = "/films/popular")

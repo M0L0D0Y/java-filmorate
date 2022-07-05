@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -11,11 +10,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.Validator;
-import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
 import ru.yandex.practicum.filmorate.service.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.service.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.service.mappers.RatingMapper;
-import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,49 +32,133 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilm() {
-        String query = "SELECT * FROM FILMS";
-        log.info("Все фильмы получены");
-        return jdbcTemplate.query(
-                query,
-                new FilmMapper());
+        List<Film> films = getAllDataFilms();
+        for (Film film : films) {
+            Rating rating = getAllRating(film);
+            film.setMpa(rating);
+        }
+        for (Film film : films) {
+            List<Genre> genres = getDateGenreById(film.getId());
+            film.setGenres(genres);
+        }
+        return films;
     }
 
     @Override
     public Film addFilm(Film film) throws ValidationException {
         validator.validateFilm(film);
-        String queryAddFilm = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION) " +
-                "VALUES(?, ?, ?, ?)";
-        jdbcTemplate.update(queryAddFilm, film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration());
-        log.info("Значения в таблицу FILMS внесены");
-
-        String queryForReturnFilm = "SELECT * FROM FILMS WHERE DESCRIPTION = ?";
-        Film film1 = jdbcTemplate.query(queryForReturnFilm,
-                        new FilmMapper(),
-                        film.getDescription())
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("Ошибка вставки"));
-
-        String queryAddRatingFilm = "INSERT INTO FILM_RATING(FILM_ID, RATING_ID) VALUES (?, ?)";
-        jdbcTemplate.update(queryAddRatingFilm, film1.getId(), film.getMpa().getId());
-        log.info("Значения в таблицу FILM_RATING внесены");
-
-        if (film.getGenres() != null) {
-            List<Genre> genres = new ArrayList<>(film.getGenres());
-            for (Genre genre : genres) {
-                String queryAddGenreFilm = "INSERT INTO FILM_GENRE(FILM_ID, GENRE_ID) VALUES (?, ?)";
-                jdbcTemplate.update(queryAddGenreFilm, film1.getId(), genre.getId());
-            }
-            log.info("Значения в таблицу FILM_GENRE внесены");
-        }
-        film.setId(film1.getId());
-        log.info("Фильм с id = {} добавлен", film.getId());
-        return film;
+        addDataFilm(film);//добавление данных в таблицу FILMS
+        Film lastFilm = getLastFilm();
+        addRatingFilm(film, lastFilm);//добавление данных в таблицу FILM_RATING
+        addGenreFilm(film, lastFilm);//добавление данных в таблицу GENRE_ID
+        addDataInTableFilmLikedUser(lastFilm);//добавление данных в таблицу FILM_LIKED_USERS
+        Film filmForReturn = getFilm(lastFilm.getId());
+        log.info("Фильм с id = {} добавлен", filmForReturn.getId());
+        return filmForReturn;
     }
 
     @Override
     public void deleteFilm(long id) throws NotFoundException {
+        checkExistId(id);//проверка на существование такого id
+        deleteDataFilmById(id);//удаление данных из FILMS
+        deleteDateRatingBuId(id);//удаление данных из FILM_RATING
+        deleteDateGenreById(id);//удаление данных из FILM_GENRE
+        log.info("Фильм с id = {} удален", id);
+    }
+
+    @Override
+    public Film updateFilm(Film film) throws ValidationException, NotFoundException {
+        validator.validateFilm(film);
+        checkExistId(film.getId());//проверка на существование такого id
+        updateDataTableFilms(film);// обновление данных таблицы FILMS
+        updateDataTableFilmRating(film); //обновление данных таблицы FILM_RATING
+        updateDataTableFilmGenre(film);//обновление данных таблицы FILM_GENRE
+        log.info("Фильм с id = {} обновлен", film.getId());
+        Film filmForReturn = getFilm(film.getId());
+        System.out.println(filmForReturn);
+        return filmForReturn;
+    }
+
+    @Override
+    public Film getFilm(long id) throws NotFoundException {
+        Film film = getDateFilmByID(id);
+        Rating rating = getDateRatingById(id);
+        film.setMpa(rating);
+        List<Genre> genres = getDateGenreById(id);
+        if (genres.size() > 0){
+            film.setGenres(genres);
+        }
+        log.info("Фильм с идентификатором {} найден.", id);
+        System.out.println(film);
+        return film;
+    }
+
+    private List<Film> getAllDataFilms() {
+        String queryGetAllDataFilms = "SELECT * FROM FILMS";
+        List<Film> films = jdbcTemplate.query(
+                queryGetAllDataFilms,
+                new FilmMapper());
+        log.info("Все фильмы получены");
+        return films;
+    }
+
+    private Rating getAllRating(Film film) {
+        String queryGetAllRating = "SELECT * FROM RATING WHERE RATING_ID IN(" +
+                "SELECT RATING_ID FROM FILM_RATING WHERE FILM_ID = ?)";
+        Rating rating = jdbcTemplate.query(
+                        queryGetAllRating,
+                        new RatingMapper(),
+                        film.getId())
+                .stream()
+                .findAny()
+                .orElse(null);
+        log.info("Рейтинг для фильма с id {} получен", film.getId());
+        return rating;
+    }
+
+    private void addDataFilm(Film film) {
+        String queryAddDataFilm = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION) " +
+                "VALUES(?, ?, ?, ?)";
+        jdbcTemplate.update(queryAddDataFilm, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration());
+        log.info("Значения в таблицу FILMS внесены");
+    }
+
+    private Film getLastFilm() {
+        String queryForReturnFilm = "SELECT * FROM FILMS WHERE FILM_ID IN(SELECT MAX(FILM_ID) FROM FILMS)";
+        Film film = jdbcTemplate.query(queryForReturnFilm,
+                        new FilmMapper())
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Ошибка вставки"));
+        log.info("Последний фильм получен");
+        return film;
+    }
+
+    private void addRatingFilm(Film film, Film lastFilm) {
+        String queryAddRatingFilm = "INSERT INTO FILM_RATING(FILM_ID, RATING_ID) VALUES (?, ?)";
+        jdbcTemplate.update(queryAddRatingFilm, lastFilm.getId(), film.getMpa().getId());
+        log.info("Значения в таблицу FILM_RATING внесены");
+    }
+
+    private void addGenreFilm(Film film, Film lastFilm) {
+        if (film.getGenres() != null) {
+            List<Genre> genres = new ArrayList<>(film.getGenres());
+            for (Genre genre : genres) {
+                String queryAddGenreFilm = "INSERT INTO FILM_GENRE(FILM_ID, GENRE_ID) VALUES (?, ?)";
+                jdbcTemplate.update(queryAddGenreFilm, lastFilm.getId(), genre.getId());
+            }
+            log.info("Значения в таблицу FILM_GENRE внесены");
+        }
+    }
+
+    private void addDataInTableFilmLikedUser(Film filmForReturn) {
+        String queryAddDataInTableFilmLikedUser = "INSERT INTO FILM_LIKED_USERS (FILM_ID, USER_ID) VALUES (?, ?)";
+        jdbcTemplate.update(queryAddDataInTableFilmLikedUser, filmForReturn.getId(), null);
+        log.info("Значения в таблицу FILM_LIKED_USERS внесены. USER_ID = null");
+    }
+
+    private void checkExistId(long id) throws NotFoundException{
         String queryCheckDateFilmById = "SELECT * FROM FILMS WHERE FILM_ID = ?";
         Film film = jdbcTemplate.query(
                         queryCheckDateFilmById,
@@ -86,46 +167,50 @@ public class FilmDbStorage implements FilmStorage {
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + id + " не найден."));
+        log.info("Фильм с id {} существует", id);
+    }
+
+    private void deleteDataFilmById(long id) {
         String queryDeleteDataFilmById = "DELETE FROM FILMS WHERE FILM_ID = ?";
         jdbcTemplate.update(queryDeleteDataFilmById, id);
         log.info("Значения из таблицы FILMS удалены по id {}", id);
+    }
 
+    private void deleteDateRatingBuId(long id) {
         String queryDeleteDateRatingBuId = "DELETE FROM FILM_RATING WHERE FILM_ID = ?";
         jdbcTemplate.update(queryDeleteDateRatingBuId, id);
         log.info("Значения из таблицы FILM_RATING удалены по id {}", id);
+    }
 
-        String queryCheckDateGenreById = "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?";
-        List<Genre> genres = jdbcTemplate.query(
-                queryCheckDateGenreById,
-                new GenreMapper(),
-                id);
+    private void deleteDateGenreById(long id) {
         String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
         jdbcTemplate.update(queryDeleteDateGenreById, id);
         log.info("Значения из таблицы FILM_GENRE удалены по id {}", id);
-        log.info("Фильм с id = {} удален", id);
     }
 
-    @Override
-    public Film updateFilm(Film film) throws ValidationException, NotFoundException {
-        validator.validateFilm(film);
-        String queryCheckDateFilmById = "SELECT * FROM FILMS WHERE FILM_ID = ?";
-        Film film1 = jdbcTemplate.query(
-                        queryCheckDateFilmById,
-                        new FilmMapper(),
-                        film.getId())
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + film.getId() + " не найден."));
-
+    private void updateDataTableFilms(Film film) {
         String queryUpdateDataTableFilms = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?,RELEASE_DATE = ?, " +
                 "DURATION = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(queryUpdateDataTableFilms, film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getId());
         log.info("Значения из таблицы FILMS обновлены по id {}", film.getId());
-        Rating rating = film.getMpa();
-        String queryUpdateDataTableFilmRating = "UPDATE FILM_RATING SET RATING_ID = ? WHERE FILM_ID = ?";
-        jdbcTemplate.update(queryUpdateDataTableFilmRating, rating.getId(), film.getId());
+        System.out.println();
+    }
 
+    private void updateDataTableFilmRating(Film film) {
+        if (film.getMpa() != null) {
+            Rating rating = film.getMpa();
+            String queryUpdateDataTableFilmRating = "UPDATE FILM_RATING SET RATING_ID = ? WHERE FILM_ID = ?";
+            jdbcTemplate.update(queryUpdateDataTableFilmRating, rating.getId(), film.getId());
+            log.info("Значения из таблицы FILM_RATING обновлены по id {}", film.getId());
+        } else {
+            String queryUpdateDataTableFilmRating = "UPDATE FILM_RATING SET RATING_ID = ? WHERE FILM_ID = ?";
+            jdbcTemplate.update(queryUpdateDataTableFilmRating, null, film.getId());
+            log.info("Значения из таблицы FILM_RATING обновлены по id {}. Значение RATING_ID = null", film.getId());
+        }
+    }
+
+    private void updateDataTableFilmGenre(Film film) {
         if (film.getGenres() != null) {
             List<Genre> genres = new ArrayList<>(film.getGenres());
             for (Genre genre : genres) {
@@ -133,82 +218,49 @@ public class FilmDbStorage implements FilmStorage {
                 jdbcTemplate.update(queryUpdateDataTableFilmGenre, genre.getId(), film.getId());
             }
             log.info("Значения из таблицы FILM_GENRE обновлены по id {}", film.getId());
+        } else {
+            String queryUpdateDataTableFilmGenre = "UPDATE  FILM_GENRE SET GENRE_ID = ? WHERE FILM_ID = ?";
+            jdbcTemplate.update(queryUpdateDataTableFilmGenre, null, film.getId());
+            log.info("Значения из таблицы FILM_GENRE обновлены по id {}. Значение GENRE_ID = null", film.getId());
         }
-        log.info("Фильм с id = {} обновлен", film.getId());
-        return film;
     }
 
-    @Override
-    public Film getFilm(long id) throws NotFoundException {
-        String queryGetDateFilm = "SELECT * FROM FILMS WHERE FILM_ID = ?";
+    private Film getDateFilmByID(long id) {
+        String queryGetDateFilmById = "SELECT * FROM FILMS WHERE FILM_ID = ?";
         Film film = jdbcTemplate.query(
-                        queryGetDateFilm,
+                        queryGetDateFilmById,
                         new FilmMapper(),
                         id)
                 .stream()
                 .findAny()
                 .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + id + " не найден."));
         log.info("Значения из таблицы FILMS получены по id {}", id);
+        return film;
+    }
 
-        String queryGetDateRating = "SELECT RATING_ID FROM FILM_RATING WHERE FILM_ID = ?";
+    private Rating getDateRatingById(long id) {
+        String queryGetDateRatingById = "SELECT * FROM RATING WHERE RATING_ID IN (" +
+                "SELECT RATING_ID FROM FILM_RATING WHERE FILM_ID = ?)";
         Rating rating = jdbcTemplate.query(
-                        queryGetDateRating,
+                        queryGetDateRatingById,
                         new RatingMapper(),
                         id)
                 .stream()
                 .findAny()
-                .orElseThrow(() -> new NotFoundException("Фильм с идентификатором " + id + " не найден."));
+                .orElseThrow(() -> new NotFoundException("Рейтинг для фильма с идентификатором " + id + " не найден."));
         log.info("Значения из таблицы FILM_RATING получены по id {}", id);
+        return rating;
+    }
 
-        String queryGetDateGenre = "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?";
+    private List<Genre> getDateGenreById(long id) {
+        String queryGetDateGenreById = "SELECT * FROM GENRES WHERE GENRE_ID IN (" +
+                "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
         List<Genre> genres = jdbcTemplate.query(
-                queryGetDateGenre,
+                queryGetDateGenreById,
                 new GenreMapper(),
                 id);
         log.info("Значения из таблицы FILM_GENRE получены по id {}", id);
-        film.setMpa(rating);
-        film.setGenres(genres);
-        log.info("Фильм с идентификатором {} найден.", id);
-        return film;
+        return genres;
     }
 
-    public Collection<Genre> getAllGenres() {
-        String query = "SELECT * FROM GENRES";
-        log.info("Все жанры получены");
-        return jdbcTemplate.query(
-                query,
-                new GenreMapper());
-    }
-
-    public Genre getGenreById(int genreID) {
-        String query = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
-        Genre genre = jdbcTemplate.query(query,
-                        new GenreMapper(),
-                        genreID)
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + genreID + " не найден."));
-        log.info("Жанр с id = {} получен", genreID);
-        return genre;
-    }
-
-    public Collection<Rating> getAllRating() {
-        String query = "SELECT * FROM RATING";
-        log.info("Все рейтинги получены");
-        return jdbcTemplate.query(
-                query,
-                new RatingMapper());
-    }
-
-    public Rating getRatingById(int ratingId) {
-        String query = "SELECT * FROM RATING WHERE RATING_ID = ?";
-        Rating rating = jdbcTemplate.query(query,
-                        new RatingMapper(),
-                        ratingId)
-                .stream()
-                .findAny()
-                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + ratingId + " не найден."));
-        log.info("Рейтинг с id = {} получен", ratingId);
-        return rating;
-    }
 }

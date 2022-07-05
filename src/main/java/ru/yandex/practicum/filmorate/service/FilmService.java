@@ -9,8 +9,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.mappers.FilmMapper;
+import ru.yandex.practicum.filmorate.service.mappers.GenreMapper;
+import ru.yandex.practicum.filmorate.service.mappers.RatingMapper;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.*;
@@ -56,8 +60,51 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<Genre> getAllGenres() {
+        String query = "SELECT * FROM GENRES";
+        log.info("Все жанры получены");
+        return jdbcTemplate.query(
+                query,
+                new GenreMapper());
+    }
+
+    public Genre getGenreById(int genreID) {
+        String query = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
+        Genre genre = jdbcTemplate.query(query,
+                        new GenreMapper(),
+                        genreID)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + genreID + " не найден."));
+        log.info("Жанр с id = {} получен", genreID);
+        return genre;
+    }
+
+    public Collection<Rating> getAllRating() {
+        String query = "SELECT * FROM RATING";
+        log.info("Все рейтинги получены");
+        return jdbcTemplate.query(
+                query,
+                new RatingMapper());
+    }
+
+    public Rating getRatingById(int ratingId) {
+        String query = "SELECT * FROM RATING WHERE RATING_ID = ?";
+        Rating rating = jdbcTemplate.query(query,
+                        new RatingMapper(),
+                        ratingId)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Жанр с идентификатором " + ratingId + " не найден."));
+        log.info("Рейтинг с id = {} получен", ratingId);
+        return rating;
+    }
+
     private void checkExistId(long filmId, long userId) throws NotFoundException {
         Film film = memoryFilmStorage.getFilm(filmId);//для проверки существования такого id
         User user = memoryUserStorage.getUser(userId); //для проверки существования такого id
     }
+    //TODO ДОПИСАТЬ СЕРВИС ФИЛЬМОВ
+
+
 }
