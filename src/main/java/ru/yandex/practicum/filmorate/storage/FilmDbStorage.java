@@ -39,7 +39,10 @@ public class FilmDbStorage implements FilmStorage {
         }
         for (Film film : films) {
             List<Genre> genres = getDateGenreById(film.getId());
-            film.setGenres(genres);
+            if (genres.size() != 0) {
+                film.setGenres(genres);
+            }
+            film.setGenres(null);
         }
         return films;
     }
@@ -185,16 +188,17 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void deleteDateGenreById(long id) {//TODO ПОДУМАТЬ КАК РЕАЛИЗОВАТЬ ЭТОТ МЕТОД
-        String query = "SELECT * FROM GENRES WHERE GENRE_ID IN (SELECT DISTINCT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
-        List<Genre> genres = jdbcTemplate.query(
-                query,
-                new GenreMapper(),
-                id
-        );
-        for (Genre genre : genres) {
-            String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
-            jdbcTemplate.update(queryDeleteDateGenreById, id);
+        List<Genre> genres = getDateGenreById(id);
+        if (genres.size() > 0) {
+            for (Genre genre : genres) {
+                String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ? AND GENRE_ID = ?";
+                jdbcTemplate.update(queryDeleteDateGenreById, id, genre.getId());
+            }
+        } else {
+            String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ? AND GENRE_ID = ?";
+            jdbcTemplate.update(queryDeleteDateGenreById, id, null);
         }
+
         log.info("Значения из таблицы FILM_GENRE удалены по id {}", id);
     }
 
@@ -225,6 +229,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void updateDataTableFilmGenre(Film film) {
+        deleteDateGenreById(film.getId());
         if (film.getGenres() != null) {
             List<Genre> genres = new ArrayList<>(film.getGenres());
             for (Genre genre : genres) {
@@ -267,7 +272,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private List<Genre> getDateGenreById(long id) {
         String queryGetDateGenreById = "SELECT * FROM GENRES WHERE GENRE_ID IN (" +
-                "SELECT GENRE_ID FROM LIST_GENRE WHERE LIST_ID = ?)";
+                "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
         List<Genre> genres = jdbcTemplate.query(
                 queryGetDateGenreById,
                 new GenreMapper(),
