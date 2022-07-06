@@ -50,7 +50,7 @@ public class FilmDbStorage implements FilmStorage {
         addDataFilm(film);//добавление данных в таблицу FILMS
         Film lastFilm = getLastFilm();
         addRatingFilm(film, lastFilm);//добавление данных в таблицу FILM_RATING
-        addGenreFilm(film, lastFilm);//добавление данных в таблицу GENRE_ID
+        addGenreFilm(film, lastFilm);//добавление данных в таблицу FILM_GENRE
         addDataInTableFilmLikedUser(lastFilm);//добавление данных в таблицу FILM_LIKED_USERS
         Film filmForReturn = getFilm(lastFilm.getId());
         log.info("Фильм с id = {} добавлен", filmForReturn.getId());
@@ -63,6 +63,7 @@ public class FilmDbStorage implements FilmStorage {
         deleteDataFilmById(id);//удаление данных из FILMS
         deleteDateRatingBuId(id);//удаление данных из FILM_RATING
         deleteDateGenreById(id);//удаление данных из FILM_GENRE
+        deleteLikeById(id);
         log.info("Фильм с id = {} удален", id);
     }
 
@@ -74,9 +75,7 @@ public class FilmDbStorage implements FilmStorage {
         updateDataTableFilmRating(film); //обновление данных таблицы FILM_RATING
         updateDataTableFilmGenre(film);//обновление данных таблицы FILM_GENRE
         log.info("Фильм с id = {} обновлен", film.getId());
-        Film filmForReturn = getFilm(film.getId());
-        System.out.println(filmForReturn);
-        return filmForReturn;
+        return getFilm(film.getId());
     }
 
     @Override
@@ -85,11 +84,10 @@ public class FilmDbStorage implements FilmStorage {
         Rating rating = getDateRatingById(id);
         film.setMpa(rating);
         List<Genre> genres = getDateGenreById(id);
-        if (genres.size() > 0){
+        if (genres.size() > 0) {
             film.setGenres(genres);
         }
         log.info("Фильм с идентификатором {} найден.", id);
-        System.out.println(film);
         return film;
     }
 
@@ -149,6 +147,10 @@ public class FilmDbStorage implements FilmStorage {
                 jdbcTemplate.update(queryAddGenreFilm, lastFilm.getId(), genre.getId());
             }
             log.info("Значения в таблицу FILM_GENRE внесены");
+        } else {
+            String queryAddGenreFilm = "INSERT INTO FILM_GENRE(FILM_ID, GENRE_ID) VALUES (?, ?)";
+            jdbcTemplate.update(queryAddGenreFilm, lastFilm.getId(), null);
+            log.info("Значения в таблицу FILM_GENRE внесены. Значение GENRE_ID = null");
         }
     }
 
@@ -158,7 +160,7 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Значения в таблицу FILM_LIKED_USERS внесены. USER_ID = null");
     }
 
-    private void checkExistId(long id) throws NotFoundException{
+    private void checkExistId(long id) throws NotFoundException {
         String queryCheckDateFilmById = "SELECT * FROM FILMS WHERE FILM_ID = ?";
         Film film = jdbcTemplate.query(
                         queryCheckDateFilmById,
@@ -182,10 +184,23 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Значения из таблицы FILM_RATING удалены по id {}", id);
     }
 
-    private void deleteDateGenreById(long id) {
-        String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
-        jdbcTemplate.update(queryDeleteDateGenreById, id);
+    private void deleteDateGenreById(long id) {//TODO ПОДУМАТЬ КАК РЕАЛИЗОВАТЬ ЭТОТ МЕТОД
+        String query = "SELECT * FROM GENRES WHERE GENRE_ID IN (SELECT DISTINCT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
+        List<Genre> genres = jdbcTemplate.query(
+                query,
+                new GenreMapper(),
+                id
+        );
+        for (Genre genre : genres) {
+            String queryDeleteDateGenreById = "DELETE FROM FILM_GENRE WHERE FILM_ID = ?";
+            jdbcTemplate.update(queryDeleteDateGenreById, id);
+        }
         log.info("Значения из таблицы FILM_GENRE удалены по id {}", id);
+    }
+
+    private void deleteLikeById(long id) {
+        String queryDeleteLikeById = "DELETE FROM FILM_LIKED_USERS WHERE FILM_ID = ?";
+        jdbcTemplate.update(queryDeleteLikeById, id);
     }
 
     private void updateDataTableFilms(Film film) {
@@ -204,8 +219,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(queryUpdateDataTableFilmRating, rating.getId(), film.getId());
             log.info("Значения из таблицы FILM_RATING обновлены по id {}", film.getId());
         } else {
-            String queryUpdateDataTableFilmRating = "UPDATE FILM_RATING SET RATING_ID = ? WHERE FILM_ID = ?";
-            jdbcTemplate.update(queryUpdateDataTableFilmRating, null, film.getId());
+            deleteDateRatingBuId(film.getId());
             log.info("Значения из таблицы FILM_RATING обновлены по id {}. Значение RATING_ID = null", film.getId());
         }
     }
@@ -214,13 +228,12 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             List<Genre> genres = new ArrayList<>(film.getGenres());
             for (Genre genre : genres) {
-                String queryUpdateDataTableFilmGenre = "UPDATE  FILM_GENRE SET GENRE_ID = ? WHERE FILM_ID = ?";
-                jdbcTemplate.update(queryUpdateDataTableFilmGenre, genre.getId(), film.getId());
+                String queryUpdateDataTableFilmGenre = "INSERT INTO FILM_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?)";
+                jdbcTemplate.update(queryUpdateDataTableFilmGenre, film.getId(), genre.getId());
             }
             log.info("Значения из таблицы FILM_GENRE обновлены по id {}", film.getId());
         } else {
-            String queryUpdateDataTableFilmGenre = "UPDATE  FILM_GENRE SET GENRE_ID = ? WHERE FILM_ID = ?";
-            jdbcTemplate.update(queryUpdateDataTableFilmGenre, null, film.getId());
+            deleteDateGenreById(film.getId());
             log.info("Значения из таблицы FILM_GENRE обновлены по id {}. Значение GENRE_ID = null", film.getId());
         }
     }
@@ -254,7 +267,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private List<Genre> getDateGenreById(long id) {
         String queryGetDateGenreById = "SELECT * FROM GENRES WHERE GENRE_ID IN (" +
-                "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
+                "SELECT GENRE_ID FROM LIST_GENRE WHERE LIST_ID = ?)";
         List<Genre> genres = jdbcTemplate.query(
                 queryGetDateGenreById,
                 new GenreMapper(),

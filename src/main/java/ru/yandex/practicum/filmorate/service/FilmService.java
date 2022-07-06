@@ -37,8 +37,8 @@ public class FilmService {
     }
 
     public void addLikeFilm(long filmId, long userId) throws NotFoundException {
-        checkExistId(filmId, userId);
-        String query = "INSERT INTO FILM_LIKED_USERS VALUES(?, ?)";
+        //checkExistId(filmId, userId);
+        String query = "INSERT INTO FILM_LIKED_USERS (FILM_ID, USER_ID) VALUES(?,?) ";
         jdbcTemplate.update(query, filmId, userId);
         log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, filmId);
     }
@@ -51,13 +51,21 @@ public class FilmService {
     }
 
     public List<Film> getMostPopularFilms(long count) {
-        String query = "SELECT * FROM FILMS WHERE FILM_ID IN (" +
-                "SELECT FILM_ID " +
-                "FROM FILM_LIKED_USERS GROUP BY FILM_ID ORDER BY COUNT (USER_ID) DESC)";
-        List<Film> films = jdbcTemplate.query(query, new FilmMapper());
-        return films.stream()
+        String query = "SELECT FILM_LIKED_USERS.FILM_ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION " +
+                "FROM FILMS RIGHT JOIN FILM_LIKED_USERS ON FILMS.FILM_ID = FILM_LIKED_USERS.FILM_ID " +
+                "GROUP BY FILM_LIKED_USERS.FILM_ID " +
+                "ORDER BY COUNT(USER_ID) DESC";
+        List<Film> films = jdbcTemplate.query(
+                        query,
+                        new FilmMapper())
+                .stream()
                 .limit(count)
                 .collect(Collectors.toList());
+        for (Film film: films){
+            film.setMpa(getDateRatingById(film.getId()));
+            film.setGenres(getDateGenreById(film.getId()));
+        }
+        return films;
     }
 
     public Collection<Genre> getAllGenres() {
@@ -89,6 +97,8 @@ public class FilmService {
     }
 
     public Rating getRatingById(int ratingId) {
+        log.info("Ищем рейтинрг с id = {} получен", ratingId);
+        System.out.println(ratingId);
         String query = "SELECT * FROM RATING WHERE RATING_ID = ?";
         Rating rating = jdbcTemplate.query(query,
                         new RatingMapper(),
@@ -104,7 +114,32 @@ public class FilmService {
         Film film = memoryFilmStorage.getFilm(filmId);//для проверки существования такого id
         User user = memoryUserStorage.getUser(userId); //для проверки существования такого id
     }
-    //TODO ДОПИСАТЬ СЕРВИС ФИЛЬМОВ
+
+    private Rating getDateRatingById(long id) {
+        String queryGetDateRatingById = "SELECT * FROM RATING WHERE RATING_ID IN (" +
+                "SELECT RATING_ID FROM FILM_RATING WHERE FILM_ID = ?)";
+        Rating rating = jdbcTemplate.query(
+                        queryGetDateRatingById,
+                        new RatingMapper(),
+                        id)
+                .stream()
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("Рейтинг для фильма с идентификатором " + id + " не найден."));
+        log.info("Значения из таблицы FILM_RATING получены по id {}", id);
+        return rating;
+    }
+
+    private List<Genre> getDateGenreById(long id) {
+        String queryGetDateGenreById = "SELECT * FROM GENRES WHERE GENRE_ID IN (" +
+                "SELECT GENRE_ID FROM FILM_GENRE WHERE FILM_ID = ?)";
+        List<Genre> genres = jdbcTemplate.query(
+                queryGetDateGenreById,
+                new GenreMapper(),
+                id);
+        log.info("Значения из таблицы FILM_GENRE получены по id {}", id);
+        return genres;
+    }
+    //TODO ПОДУМАТЬ НАД ДУБЛИРОВАНИЕМ МЕТОДОВ getDateRatingById И getDateGenreById
 
 
 }

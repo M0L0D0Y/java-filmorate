@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -38,9 +40,29 @@ public class FilmController {
     }
 
     @GetMapping(value = "/films/popular")
-    private List<Film> getMostPopularFilms(
+    public List<Film> getMostPopularFilms(
             @RequestParam(defaultValue = "10") long count) {
         return filmService.getMostPopularFilms(count);
+    }
+
+    @GetMapping(value = "/genres/{id}")
+    public Genre getGenreById(@PathVariable int id) throws NotFoundException {
+        return filmService.getGenreById(id);
+    }
+
+    @GetMapping(value = "/genres")
+    public Collection<Genre> getAllGenres() throws NotFoundException {
+        return filmService.getAllGenres();
+    }
+
+    @GetMapping(value = "/mpa/{id}")
+    public Rating getRatingById(@PathVariable int id) throws NotFoundException {
+        return filmService.getRatingById(id);
+    }
+
+    @GetMapping(value = "/mpa")
+    public Collection<Rating> getAllRating() throws NotFoundException {
+        return filmService.getAllRating();
     }
 
     @PostMapping(value = "/films")

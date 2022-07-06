@@ -18,31 +18,37 @@ CREATE TABLE IF NOT EXISTS "FILMS"
 
 CREATE TABLE IF NOT EXISTS "FILM_GENRE"
 (
-    "FILM_ID"  int PRIMARY KEY,
-    "GENRE_ID" int
+    "FILM_ID"  int primary key ,
+    "LIST_ID" int NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "GENRES"
 (
     "GENRE_ID" int auto_increment primary key not null,
-    "NAME"     varchar(20)              NOT NULL
+    "NAME"     varchar(20)                    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "FILM_RATING"
 (
-    "FILM_ID"   int PRIMARY KEY,
+    "FILM_ID" int PRIMARY KEY,
     "RATING_ID" int not null
+);
+
+CREATE TABLE IF NOT EXISTS LIST_GENRE
+(
+    LIST_ID  int auto_increment primary key not null,
+    GENRE_ID int,
 );
 
 CREATE TABLE IF NOT EXISTS "RATING"
 (
     "RATING_ID" int auto_increment primary key not null,
-    "NAME"      varchar(20)              NOT NULL
+    "NAME"      varchar(5)                     NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "FILM_LIKED_USERS"
 (
-    "FILM_ID" int PRIMARY KEY,
+    "FILM_ID" int not null,
     "USER_ID" int
 );
 
@@ -56,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "FRIENDSHIP"
 CREATE TABLE IF NOT EXISTS "STATUS_FRIENDSHIP"
 (
     "STATUS_ID" int auto_increment primary key not null,
-    "NAME"      varchar                  NOT NULL
+    "NAME"      varchar                        NOT NULL
 );
 
 
@@ -69,8 +75,11 @@ ALTER TABLE "FILM_GENRE"
 ALTER TABLE "FILM_RATING"
     ADD FOREIGN KEY ("FILM_ID") REFERENCES "FILMS" ("FILM_ID");
 
-ALTER TABLE "FILM_RATING"
-    ADD FOREIGN KEY ("RATING_ID") REFERENCES "RATING" ("RATING_ID");
+ALTER TABLE "FILM_GENRE"
+    ADD FOREIGN KEY ("LIST_ID") REFERENCES "LIST_GENRE" ("LIST_ID");
+
+ALTER TABLE "LIST_GENRE"
+    ADD FOREIGN KEY ("GENRE_ID") REFERENCES "GENRES" ("GENRE_ID");
 
 ALTER TABLE "FILM_LIKED_USERS"
     ADD FOREIGN KEY ("FILM_ID") REFERENCES "FILMS" ("FILM_ID");
@@ -87,19 +96,3 @@ ALTER TABLE "FRIENDSHIP"
 ALTER TABLE "FRIENDSHIP"
     ADD FOREIGN KEY ("STATUS_ID") REFERENCES "STATUS_FRIENDSHIP" ("STATUS_ID");
 
-INSERT INTO GENRES(NAME)
-VALUES ('Комедия'),
-       ('Драма'),
-       ('Мультфильм'),
-       ('Триллер'),
-       ('Документальный'),
-       ('Боевик');
-INSERT INTO RATING(NAME)
-VALUES ('G'),
-       ('PG'),
-       ('PG-13'),
-       ('R'),
-       ('NC-17');
-INSERT INTO STATUS_FRIENDSHIP(NAME)
-VALUES ('Неподтверждена'),
-       ('Подтверждена');
