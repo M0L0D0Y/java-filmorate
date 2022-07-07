@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class Validator {
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
-    private static final String EMPTY_STRING = "";
+    private static final String EMPTY_STRING = " ";
     private static final String EMAIL_SYMBOL = "@";
 
     public void validateFilm(Film film) throws ValidationException {
@@ -34,7 +34,7 @@ public class Validator {
         if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
             throw new ValidationException("Неправильный формат почты " + user.getEmail());
         }
-        if ((user.getLogin() == null) || (EMPTY_STRING.equals(user.getLogin()))) {
+        if ((user.getLogin() == null) || (user.getLogin().contains(EMPTY_STRING))) {
             throw new ValidationException("Неправильный формат логина " + user.getLogin());
         }
         if ((user.getName() == null) || (EMPTY_STRING.equals(user.getName()))) {
