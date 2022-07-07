@@ -89,6 +89,9 @@ public class FilmDbStorage implements FilmStorage {
         List<Genre> genres = getDateGenreById(id);
         if (genres.size() > 0) {
             film.setGenres(genres);
+        }else {
+            List<Genre> EmptyListGenres = new ArrayList<>();
+            film.setGenres(EmptyListGenres);
         }
         log.info("Фильм с идентификатором {} найден.", id);
         return film;
