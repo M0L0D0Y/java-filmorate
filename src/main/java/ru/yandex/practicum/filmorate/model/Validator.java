@@ -9,12 +9,17 @@ import java.time.LocalDate;
 public class Validator {
     private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
     private static final int LINE_LENGTH = 201;
-    private static final String EMPTY_STRING = " ";
+    private static final String EMPTY_STRING = "";
+    private static final String SPACE_STRING = " ";
     private static final String EMAIL_SYMBOL = "@";
+
 
     public void validateFilm(Film film) throws ValidationException {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
             throw new ValidationException("Нет названия фильма " + film.getName());
+        }
+        if (film.getDescription() == null) {
+            throw new ValidationException("Нет описания фильма");
         }
         if (film.getDescription().length() > LINE_LENGTH) {
             throw new ValidationException("Длинна описания фильма слишком большая " + film.getDescription().length());
@@ -34,7 +39,8 @@ public class Validator {
         if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
             throw new ValidationException("Неправильный формат почты " + user.getEmail());
         }
-        if ((user.getLogin() == null) || (user.getLogin().contains(EMPTY_STRING))) {
+        if ((user.getLogin() == null) || (EMPTY_STRING.equals(user.getLogin()))
+                || (user.getLogin().contains(SPACE_STRING))) {
             throw new ValidationException("Неправильный формат логина " + user.getLogin());
         }
         if ((user.getName() == null) || (EMPTY_STRING.equals(user.getName()))) {
