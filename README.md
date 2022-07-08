@@ -1,7 +1,6 @@
 # java-filmorate
 Template repository for Filmorate project.
 ![](schema.png)
-
 Примеры SQL запросов:
 
 Получение всех фильмов
