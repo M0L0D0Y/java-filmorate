@@ -31,7 +31,7 @@ public class Validator {
             throw new ValidationException("Продолжительность фильма меньше нуля " + film.getDuration());
         }
         if (film.getMpa() == null) {
-            throw new ValidationException("Нет рейтинга фильма " + film.getDuration());
+            throw new ValidationException("Нет рейтинга фильма ");
         }
     }
 

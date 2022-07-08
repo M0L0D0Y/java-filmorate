@@ -32,9 +32,8 @@ class ValidatorTest {
             "контент-менеджер и радуется вся команда!";
     private static final int DURATION = 120;
     private static final int FAIL_DURATION = -1;
-    private static final int UPDATE_DURATION = 90;
 
-    private static Validator validator = new Validator();
+    private static final Validator validator = new Validator();
 
     @Test
     void createUserWithNullName() throws ValidationException {
@@ -131,5 +130,15 @@ class ValidatorTest {
         film.setReleaseDate(PAST_DATE);
         assertThrows(ValidationException.class, () -> validator.validateFilm(film),
                 "Продолжительность фильма меньше нуля " + film.getDuration());
+    }
+    @Test
+    void createFilmWithNullRating() {
+        Film film = new Film();
+        film.setDescription(DESCRIPTION);
+        film.setDuration(FAIL_DURATION);
+        film.setName(NAME);
+        film.setReleaseDate(CORRECT_DATE);
+        assertThrows(ValidationException.class, () -> validator.validateFilm(film),
+                "Нет рейтинга фильма");
     }
 }

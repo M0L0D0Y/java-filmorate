@@ -50,11 +50,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) throws ValidationException {
         validator.validateFilm(film);
-        addDataFilm(film);//добавление данных в таблицу FILMS
+        addDataFilm(film);
         Film lastFilm = getLastFilm();
-        addRatingFilm(film, lastFilm);//добавление данных в таблицу FILM_RATING
-        addGenreFilm(film, lastFilm);//добавление данных в таблицу FILM_GENRE
-        addDataInTableFilmLikedUser(lastFilm);//добавление данных в таблицу FILM_LIKED_USERS
+        addRatingFilm(film, lastFilm);
+        addGenreFilm(film, lastFilm);
+        addDataInTableFilmLikedUser(lastFilm);
         Film filmForReturn = getFilm(lastFilm.getId());
         log.info("Фильм с id = {} добавлен", filmForReturn.getId());
         return filmForReturn;
@@ -62,21 +62,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(long id) throws NotFoundException {
-        checkExistId(id);//проверка на существование такого id
-        deleteDataFilmById(id);//удаление данных из FILMS
-        deleteDateRatingBuId(id);//удаление данных из FILM_RATING
-        deleteDateGenreById(id);//удаление данных из FILM_GENRE
-        deleteLikeById(id);
+        checkExistId(id);
+        deleteDataFilmById(id);
         log.info("Фильм с id = {} удален", id);
     }
 
     @Override
     public Film updateFilm(Film film) throws ValidationException, NotFoundException {
         validator.validateFilm(film);
-        checkExistId(film.getId());//проверка на существование такого id
-        updateDataTableFilms(film);// обновление данных таблицы FILMS
-        updateDataTableFilmRating(film); //обновление данных таблицы FILM_RATING
-        updateDataTableFilmGenre(film);//обновление данных таблицы FILM_GENRE
+        checkExistId(film.getId());
+        updateDataTableFilms(film);
+        updateDataTableFilmRating(film);
+        updateDataTableFilmGenre(film);
         log.info("Фильм с id = {} обновлен", film.getId());
         return getFilm(film.getId());
     }
@@ -205,11 +202,6 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Значения из таблицы FILM_GENRE удалены по id {}", id);
     }
 
-    private void deleteLikeById(long id) {
-        String queryDeleteLikeById = "DELETE FROM FILM_LIKED_USERS WHERE FILM_ID = ?";
-        jdbcTemplate.update(queryDeleteLikeById, id);
-    }
-
     private void updateDataTableFilms(Film film) {
         String queryUpdateDataTableFilms = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?,RELEASE_DATE = ?, " +
                 "DURATION = ? WHERE FILM_ID = ?";
@@ -283,5 +275,4 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Значения из таблицы FILM_GENRE получены по id {}", id);
         return genres;
     }
-
 }
