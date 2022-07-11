@@ -31,27 +31,32 @@ public class FilmService {
     @Autowired
     public FilmService(@Qualifier("DatabaseFilmStorage") FilmStorage filmStorage,
                        @Qualifier("DatabaseUserStorage") UserStorage userStorage,
-                       @Qualifier("DatabasePopularFilmsStorage")PopularFilmsStorage popularFilmsStorage,
-                       @Qualifier("DatabaseGenreStorage")GenreStorage genreStorage,
-                       @Qualifier("DatabaseRatingStorage")RatingStorage ratingStorage) {
+                       @Qualifier("DatabasePopularFilmsStorage") PopularFilmsStorage popularFilmsStorage,
+                       @Qualifier("DatabaseGenreStorage") GenreStorage genreStorage,
+                       @Qualifier("DatabaseRatingStorage") RatingStorage ratingStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.popularFilmsStorage = popularFilmsStorage;
         this.genreStorage = genreStorage;
         this.ratingStorage = ratingStorage;
     }
+
     public Collection<Film> getAllFilms() {
         return filmStorage.getAllFilm();
     }
+
     public Film getFilmById(long id) {
         return filmStorage.getFilm(id);
     }
+
     public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
+
     public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
+
     public void deleteFilm(long id) {
         filmStorage.deleteFilm(id);
     }

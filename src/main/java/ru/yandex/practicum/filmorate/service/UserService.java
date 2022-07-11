@@ -25,22 +25,27 @@ public class UserService {
 
     @Autowired
     public UserService(@Qualifier("DatabaseUserStorage") UserStorage userStorage,
-                       @Qualifier("DatabaseFriendshipStorage")FriendshipStorage friendshipStorage) {
+                       @Qualifier("DatabaseFriendshipStorage") FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
         this.friendshipStorage = friendshipStorage;
     }
+
     public Collection<User> getAllUsers() {
         return userStorage.getAllUser();
     }
+
     public User getUser(long id) {
         return userStorage.getUser(id);
     }
+
     public User addUser(User user) {
         return userStorage.addUser(user);
     }
+
     public User updateUser(User user) {
         return userStorage.updateUser(user);
     }
+
     public void deleteUser(long id) {
         userStorage.deleteUser(id);
     }
@@ -62,7 +67,7 @@ public class UserService {
             log.info("Такой запрос делается впервые. Проверим на возможность подтвердить дружбу");
             FriendshipStatus statusIdFriendUser = friendshipStorage.getStatusFriendship(friendId, userId);
             if (statusIdFriendUser == FriendshipStatus.UNCONFIRMED) {
-                friendshipStorage.updateStatusFriendship(userId, friendId,FriendshipStatus.CONFIRMED);
+                friendshipStorage.updateStatusFriendship(userId, friendId, FriendshipStatus.CONFIRMED);
                 log.info("Пользователь с id {} подтвердил запрос дружбы пользователя с id {}", userId, friendId);
             }
             if (statusIdFriendUser == null) {
@@ -102,7 +107,7 @@ public class UserService {
         return friendshipStorage.getCommonUsers(id, friendId);
     }
 
-    private void checkExistId(long userId, long friendId)  {
+    private void checkExistId(long userId, long friendId) {
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
     }
