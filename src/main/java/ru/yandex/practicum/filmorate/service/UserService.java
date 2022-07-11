@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.DatabaseFriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @Slf4j
@@ -24,6 +27,21 @@ public class UserService {
                        DatabaseFriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
         this.friendshipStorage = friendshipStorage;
+    }
+    public Collection<User> getAllUsers() {
+        return userStorage.getAllUser();
+    }
+    public User getUser(long id) {
+        return userStorage.getUser(id);
+    }
+    public User addUser(User user) {
+        return userStorage.addUser(user);
+    }
+    public User updateUser(User user) {
+        return userStorage.updateUser(user);
+    }
+    public void deleteUser(long id) {
+        userStorage.deleteUser(id);
     }
 
     public void addFriend(long userId, long friendId) {

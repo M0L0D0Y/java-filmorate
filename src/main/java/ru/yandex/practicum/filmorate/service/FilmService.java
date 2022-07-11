@@ -4,12 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +39,21 @@ public class FilmService {
         this.popularFilmsStorage = popularFilmsStorage;
         this.genreStorage = genreStorage;
         this.ratingStorage = ratingStorage;
+    }
+    public Collection<Film> getAllFilms() {
+        return filmStorage.getAllFilm();
+    }
+    public Film getFilmById(long id) {
+        return filmStorage.getFilm(id);
+    }
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+    public void deleteFilm(long id) {
+        filmStorage.deleteFilm(id);
     }
 
     public void addLikeFilm(long filmId, long userId) {

@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.model.Validator;
+import ru.yandex.practicum.filmorate.service.Validator;
 import ru.yandex.practicum.filmorate.service.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.service.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.service.mappers.RatingMapper;

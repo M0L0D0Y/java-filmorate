@@ -8,9 +8,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.Validator;
 import ru.yandex.practicum.filmorate.service.mappers.FriendshipMapper;
 import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
-import ru.yandex.practicum.filmorate.model.Validator;
 
 import java.util.Collection;
 import java.util.List;

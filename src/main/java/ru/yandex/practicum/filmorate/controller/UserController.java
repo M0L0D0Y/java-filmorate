@@ -16,22 +16,20 @@ import java.util.List;
 @RestController
 public class UserController {
     private final UserService userService;
-    private final UserStorage memoryUserStorage;
 
     @Autowired
-    public UserController(UserService userService, @Qualifier("DatabaseUserStorage") UserStorage memoryUserStorage) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.memoryUserStorage = memoryUserStorage;
     }
 
     @GetMapping("/users")
     public Collection<User> getAllUsers() {
-        return memoryUserStorage.getAllUser();
+        return userService.getAllUsers();
     }
 
     @GetMapping(value = "/users/{id}")
     public User getUser(@PathVariable long id) {
-        return memoryUserStorage.getUser(id);
+        return userService.getUser(id);
     }
 
     @GetMapping(value = "/users/{id}/friends")
@@ -46,12 +44,12 @@ public class UserController {
 
     @PostMapping(value = "/users")
     public User addUser(@Valid @RequestBody User user) {
-        return memoryUserStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping(value = "/users")
     public User updateUser(@Valid @RequestBody User user) {
-        return memoryUserStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping(value = "/users/{id}/friends/{friendId}")
@@ -61,7 +59,7 @@ public class UserController {
 
     @DeleteMapping(value = "/users")
     public void deleteUser(long id) {
-        memoryUserStorage.deleteUser(id);
+        userService.deleteUser(id);
     }
 
     @DeleteMapping(value = "/users/{id}/friends/{friendId}")

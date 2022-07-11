@@ -19,22 +19,20 @@ import java.util.List;
 @RestController
 public class FilmController {
     private final FilmService filmService;
-    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmController(FilmService filmService, @Qualifier("DatabaseFilmStorage") FilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilm();
+        return filmService.getAllFilms();
     }
 
     @GetMapping(value = "/films/{id}")
     public Film getFilm(@PathVariable long id) {
-        return filmStorage.getFilm(id);
+        return filmService.getFilmById(id);
     }
 
     @GetMapping(value = "/films/popular")
@@ -65,12 +63,12 @@ public class FilmController {
 
     @PostMapping(value = "/films")
     public Film addFilm(@Valid @RequestBody Film film) {
-        return filmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping(value = "/films")
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
@@ -80,7 +78,7 @@ public class FilmController {
 
     @DeleteMapping(value = "/films")
     public void deleteFilm(@RequestParam long id) {
-        filmStorage.deleteFilm(id);
+        filmService.deleteFilm(id);
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")

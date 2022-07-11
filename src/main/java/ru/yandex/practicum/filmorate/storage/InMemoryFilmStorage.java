@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Validator;
 import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
+import ru.yandex.practicum.filmorate.service.Validator;
 
 import java.util.Collection;
 import java.util.HashMap;
