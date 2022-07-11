@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.StatusFriendship;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.DatabaseFriendshipStorage;
+import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
@@ -20,11 +21,11 @@ import java.util.*;
 @Service
 public class UserService {
     private final UserStorage userStorage;
-    private final DatabaseFriendshipStorage friendshipStorage;
+    private final FriendshipStorage friendshipStorage;
 
     @Autowired
     public UserService(@Qualifier("DatabaseUserStorage") UserStorage userStorage,
-                       DatabaseFriendshipStorage friendshipStorage) {
+                       @Qualifier("DatabaseFriendshipStorage")FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
         this.friendshipStorage = friendshipStorage;
     }
@@ -50,18 +51,18 @@ public class UserService {
             return;
         }
         checkExistId(userId, friendId);
-        StatusFriendship statusUserFriend = friendshipStorage.getStatusFriendship(userId, friendId);
-        if (statusUserFriend == StatusFriendship.UNCONFIRMED) {
+        FriendshipStatus statusUserFriend = friendshipStorage.getStatusFriendship(userId, friendId);
+        if (statusUserFriend == FriendshipStatus.UNCONFIRMED) {
             log.info("Пользователь с id {} уже отправлял запрос на дружбу пользователю с id {}", userId, friendId);
         }
-        if (statusUserFriend == StatusFriendship.CONFIRMED) {
+        if (statusUserFriend == FriendshipStatus.CONFIRMED) {
             log.info("Пользователь с id {} уже дружит с пользователем с id {}", userId, friendId);
         }
         if (statusUserFriend == null) {
             log.info("Такой запрос делается впервые. Проверим на возможность подтвердить дружбу");
-            StatusFriendship statusIdFriendUser = friendshipStorage.getStatusFriendship(friendId, userId);
-            if (statusIdFriendUser == StatusFriendship.UNCONFIRMED) {
-                friendshipStorage.updateStatusFriendship(userId, friendId,StatusFriendship.CONFIRMED);
+            FriendshipStatus statusIdFriendUser = friendshipStorage.getStatusFriendship(friendId, userId);
+            if (statusIdFriendUser == FriendshipStatus.UNCONFIRMED) {
+                friendshipStorage.updateStatusFriendship(userId, friendId,FriendshipStatus.CONFIRMED);
                 log.info("Пользователь с id {} подтвердил запрос дружбы пользователя с id {}", userId, friendId);
             }
             if (statusIdFriendUser == null) {
@@ -77,14 +78,14 @@ public class UserService {
             return;
         }
         checkExistId(id, friendId);
-        StatusFriendship status = friendshipStorage.getStatusFriendship(id, friendId);
-        if (status == StatusFriendship.CONFIRMED) {
-            friendshipStorage.updateStatusFriendship(friendId, id, StatusFriendship.UNCONFIRMED);
+        FriendshipStatus status = friendshipStorage.getStatusFriendship(id, friendId);
+        if (status == FriendshipStatus.CONFIRMED) {
+            friendshipStorage.updateStatusFriendship(friendId, id, FriendshipStatus.UNCONFIRMED);
             log.info("Статус дружбы у бывшего друга обновлен");
             friendshipStorage.deleteFriendship(id, friendId);
             log.info("Пользователь с id {} удален из списка друзей пользователя с id {}", friendId, id);
         }
-        if (status == StatusFriendship.UNCONFIRMED) {
+        if (status == FriendshipStatus.UNCONFIRMED) {
             friendshipStorage.deleteFriendship(id, friendId);
             log.info("Пользователь с id {} удален из списка друзей пользователя с id {}", friendId, id);
         }

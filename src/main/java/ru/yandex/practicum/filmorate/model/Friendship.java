@@ -10,5 +10,5 @@ public class Friendship {
     private long userId;
     private long friendId;
     @Enumerated(EnumType.STRING)
-    private StatusFriendship status;
+    private FriendshipStatus status;
 }

@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.StatusFriendship;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.mappers.FriendshipMapper;
 import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
@@ -22,7 +22,7 @@ public class DatabaseFriendshipStorage implements FriendshipStorage {
     }
 
     @Override
-    public StatusFriendship getStatusFriendship(long userId, long friendId) {
+    public FriendshipStatus getStatusFriendship(long userId, long friendId) {
         String queryFriendshipCheck = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
         Friendship friendship = jdbcTemplate.query(
                         queryFriendshipCheck,
@@ -37,7 +37,7 @@ public class DatabaseFriendshipStorage implements FriendshipStorage {
     }
 
     @Override
-    public void updateStatusFriendship(long userId, long friendId, StatusFriendship value) {
+    public void updateStatusFriendship(long userId, long friendId, FriendshipStatus value) {
         String queryConfirmFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
                 "WHERE USER_ID = ? AND FRIEND_ID = ?";
         jdbcTemplate.update(queryConfirmFriendshipFriend, value, friendId, userId);
@@ -49,7 +49,7 @@ public class DatabaseFriendshipStorage implements FriendshipStorage {
     @Override
     public void addFriendship(long userId, long friendId) {
         String queryRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryRequestFriendship, userId, friendId, StatusFriendship.UNCONFIRMED.toString());
+        jdbcTemplate.update(queryRequestFriendship, userId, friendId, FriendshipStatus.UNCONFIRMED.toString());
         log.info("Пользователь с id {} отправил запрос на дружбу пользователю с id {}", userId, friendId);
     }
 

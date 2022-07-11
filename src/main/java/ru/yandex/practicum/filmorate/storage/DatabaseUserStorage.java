@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.StatusFriendship;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.Validator;
 import ru.yandex.practicum.filmorate.service.mappers.FriendshipMapper;
@@ -90,7 +90,7 @@ public class DatabaseUserStorage implements UserStorage {
         return user;
     }
 
-    public StatusFriendship getStatusFriendship(long userId, long friendId) {
+    public FriendshipStatus getStatusFriendship(long userId, long friendId) {
         String queryFriendshipCheck = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
         Friendship friendship = jdbcTemplate.query(
                         queryFriendshipCheck,
@@ -102,16 +102,16 @@ public class DatabaseUserStorage implements UserStorage {
                 .orElse(new Friendship());
         return friendship.getStatus();
     }
-    public void updateStatusFriendship(long userId, long friendId, StatusFriendship value) {
+    public void updateStatusFriendship(long userId, long friendId, FriendshipStatus value) {
         String queryConfirmFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
                 "WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(queryConfirmFriendshipFriend, StatusFriendship.CONFIRMED, friendId, userId);
+        jdbcTemplate.update(queryConfirmFriendshipFriend, FriendshipStatus.CONFIRMED, friendId, userId);
         String queryConfirmFriendshipUser = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, StatusFriendship.CONFIRMED);
+        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, FriendshipStatus.CONFIRMED);
     }
     public void addFriendship(long userId, long friendId) {
         String queryRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryRequestFriendship, userId, friendId, StatusFriendship.UNCONFIRMED.toString());
+        jdbcTemplate.update(queryRequestFriendship, userId, friendId, FriendshipStatus.UNCONFIRMED.toString());
     }
     public void deleteFriendship(long userId, long friendId) {
         String queryDeleteRequestFriendshipUser = "DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
