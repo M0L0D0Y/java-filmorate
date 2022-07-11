@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Validator;
 import ru.yandex.practicum.filmorate.service.FilmIdGenerator;
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@Component("InMemoryFilm")
+@Component("InMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
@@ -32,7 +31,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film addFilm(Film film) throws ValidationException {
+    public Film addFilm(Film film) {
         validator.validateFilm(film);
         film.setId(filmIdGenerator.generate());
         films.put(film.getId(), film);
@@ -40,7 +39,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(long id) throws NotFoundException {
+    public void deleteFilm(long id) {
         Set<Long> listIdFilm = films.keySet();
         if (!(listIdFilm.contains(id))) {
             throw new NotFoundException("Нет фильма с таким Id " + id);
@@ -49,7 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) throws ValidationException, NotFoundException {
+    public Film updateFilm(Film film) {
         Set<Long> listIdFilm = films.keySet();
         if (!(listIdFilm.contains(film.getId()))) {
             throw new NotFoundException("Нет фильма с таким Id " + film.getId());

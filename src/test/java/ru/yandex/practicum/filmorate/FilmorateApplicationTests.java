@@ -9,8 +9,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.DatabaseFilmStorage;
+import ru.yandex.practicum.filmorate.storage.DatabaseUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,8 +33,8 @@ class FilmorateApplicationTests {
     private static final String DESCRIPTION = "testDescription";
     private static final int DURATION = 120;
     private static final int UPDATE_DURATION = 90;
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmDbStorage;
+    private final DatabaseUserStorage userStorage;
+    private final DatabaseFilmStorage filmDbStorage;
 
     @Test
     public void testUserCreateAndGet() throws ValidationException {

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,22 +13,26 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.service.mappers.GenreMapper;
 import ru.yandex.practicum.filmorate.service.mappers.RatingMapper;
-import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FilmService {
 
-    private final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
     private final FilmStorage memoryFilmStorage;
     private final UserStorage memoryUserStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public FilmService(@Qualifier("InDataBaseFilm") FilmStorage memoryFilmStorage,
-                       @Qualifier("InDataBaseUser") UserStorage memoryUserStorage, JdbcTemplate jdbcTemplate) {
+    public FilmService(@Qualifier("DatabaseFilmStorage") FilmStorage memoryFilmStorage,
+                       @Qualifier("DatabaseUserStorage") UserStorage memoryUserStorage,
+                       JdbcTemplate jdbcTemplate) {
         this.memoryFilmStorage = memoryFilmStorage;
         this.memoryUserStorage = memoryUserStorage;
         this.jdbcTemplate = jdbcTemplate;
@@ -61,7 +64,7 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toList());
         List<Film> updateFilms = new LinkedList<>();
-        for (Film film: films){
+        for (Film film : films) {
             film = memoryFilmStorage.getFilm(film.getId());
             updateFilms.add(film);
         }

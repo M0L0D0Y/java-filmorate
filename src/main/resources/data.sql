@@ -11,6 +11,3 @@ VALUES ('G'),
        ('PG-13'),
        ('R'),
        ('NC-17');
-INSERT INTO STATUS_FRIENDSHIP(NAME)
-VALUES ('Неподтверждена'),
-       ('Подтверждена');

@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -24,7 +22,7 @@ public class FilmController {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmController(FilmService filmService, @Qualifier("InDataBaseFilm") FilmStorage filmStorage) {
+    public FilmController(FilmService filmService, @Qualifier("DatabaseFilmStorage") FilmStorage filmStorage) {
         this.filmService = filmService;
         this.filmStorage = filmStorage;
     }
@@ -35,7 +33,7 @@ public class FilmController {
     }
 
     @GetMapping(value = "/films/{id}")
-    public Film getFilm(@PathVariable long id) throws NotFoundException {
+    public Film getFilm(@PathVariable long id) {
         return filmStorage.getFilm(id);
     }
 
@@ -46,47 +44,47 @@ public class FilmController {
     }
 
     @GetMapping(value = "/genres/{id}")
-    public Genre getGenreById(@PathVariable int id) throws NotFoundException {
+    public Genre getGenreById(@PathVariable int id) {
         return filmService.getGenreById(id);
     }
 
     @GetMapping(value = "/genres")
-    public Collection<Genre> getAllGenres() throws NotFoundException {
+    public Collection<Genre> getAllGenres() {
         return filmService.getAllGenres();
     }
 
     @GetMapping(value = "/mpa/{id}")
-    public Rating getRatingById(@PathVariable int id) throws NotFoundException {
+    public Rating getRatingById(@PathVariable int id) {
         return filmService.getRatingById(id);
     }
 
     @GetMapping(value = "/mpa")
-    public Collection<Rating> getAllRating() throws NotFoundException {
+    public Collection<Rating> getAllRating() {
         return filmService.getAllRating();
     }
 
     @PostMapping(value = "/films")
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
+    public Film addFilm(@Valid @RequestBody Film film) {
         return filmStorage.addFilm(film);
     }
 
     @PutMapping(value = "/films")
-    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException, NotFoundException {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         return filmStorage.updateFilm(film);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public void addLikeFilm(@PathVariable long id, @PathVariable long userId) throws NotFoundException {
+    public void addLikeFilm(@PathVariable long id, @PathVariable long userId) {
         filmService.addLikeFilm(id, userId);
     }
 
     @DeleteMapping(value = "/films")
-    public void deleteFilm(@RequestParam long id) throws NotFoundException {
+    public void deleteFilm(@RequestParam long id) {
         filmStorage.deleteFilm(id);
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void deleteLike(@PathVariable long id, @PathVariable long userId) throws NotFoundException {
+    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
         filmService.deleteLike(id, userId);
     }
 }

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -18,14 +17,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Component("InDataBaseFilm")
-public class FilmDbStorage implements FilmStorage {
-    private final Logger log = LoggerFactory.getLogger(FilmDbStorage.class);
+@Slf4j
+@Component("DatabaseFilmStorage")
+public class DatabaseFilmStorage implements FilmStorage {
 
     private final Validator validator;
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(Validator validator, JdbcTemplate jdbcTemplate) {
+    public DatabaseFilmStorage(Validator validator, JdbcTemplate jdbcTemplate) {
         this.validator = validator;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -86,7 +85,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Genre> genres = getDateGenreById(id);
         if (genres.size() > 0) {
             film.setGenres(genres);
-        }else {
+        } else {
             List<Genre> EmptyListGenres = new ArrayList<>();
             film.setGenres(EmptyListGenres);
         }
@@ -113,7 +112,7 @@ public class FilmDbStorage implements FilmStorage {
                 .stream()
                 .findAny()
                 .orElse(null);
-        log.info("Рейтинг для фильма с id {} получен", film.getId());
+        log.info("Фильм {} имеет рейтинг {}", film.getId(), rating.getName());
         return rating;
     }
 
@@ -187,7 +186,7 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Значения из таблицы FILM_RATING удалены по id {}", id);
     }
 
-    private void deleteDateGenreById(long id) {//TODO ПОДУМАТЬ КАК РЕАЛИЗОВАТЬ ЭТОТ МЕТОД
+    private void deleteDateGenreById(long id) {
         List<Genre> genres = getDateGenreById(id);
         if (genres.size() > 0) {
             for (Genre genre : genres) {

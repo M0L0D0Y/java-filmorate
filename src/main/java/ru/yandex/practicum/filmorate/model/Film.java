@@ -20,8 +20,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
     private int duration;
-    //@NotEmpty(message = "Нет рейтинга")
     private Rating mpa;
-    //@NotEmpty(message = "Нет жанров")
     private List<Genre> genres;
 }

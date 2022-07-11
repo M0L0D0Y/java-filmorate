@@ -14,7 +14,7 @@ public class Validator {
     private static final String EMAIL_SYMBOL = "@";
 
 
-    public void validateFilm(Film film) throws ValidationException {
+    public void validateFilm(Film film) {
         if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
             throw new ValidationException("Нет названия фильма " + film.getName());
         }
@@ -35,7 +35,7 @@ public class Validator {
         }
     }
 
-    public void validateUser(User user) throws ValidationException {
+    public void validateUser(User user) {
         if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
             throw new ValidationException("Неправильный формат почты " + user.getEmail());
         }

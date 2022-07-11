@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -13,14 +12,14 @@ import ru.yandex.practicum.filmorate.model.Validator;
 import java.util.Collection;
 import java.util.List;
 
-@Component("InDataBaseUser")
-public class UserDbStorage implements UserStorage {
+@Slf4j
+@Component("DatabaseUserStorage")
+public class DatabaseUserStorage implements UserStorage {
 
-    private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
     private final Validator validator;
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(Validator validator, JdbcTemplate jdbcTemplate) {
+    public DatabaseUserStorage(Validator validator, JdbcTemplate jdbcTemplate) {
         this.validator = validator;
         this.jdbcTemplate = jdbcTemplate;
     }

@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Friendship;
+import ru.yandex.practicum.filmorate.model.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.mappers.FriendshipMapper;
 import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
@@ -15,17 +15,14 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 
+@Slf4j
 @Service
 public class UserService {
-    private static final int NO_STATUS = 0;
-    private static final int UNCONFIRMED = 1;
-    private static final int CONFIRMED = 2;
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserStorage memoryUserStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public UserService(@Qualifier("InDataBaseUser") UserStorage memoryUserStorage, JdbcTemplate jdbcTemplate) {
+    public UserService(@Qualifier("DatabaseUserStorage") UserStorage memoryUserStorage, JdbcTemplate jdbcTemplate) {
         this.memoryUserStorage = memoryUserStorage;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -36,21 +33,21 @@ public class UserService {
             return;
         }
         checkExistId(userId, friendId);
-        int statusIdUserFriend = getStatusIdUserFriend(userId, friendId);
-        if (statusIdUserFriend == UNCONFIRMED) {
+        StatusFriendship statusUserFriend = getStatusUserFriend(userId, friendId);
+        if (statusUserFriend == StatusFriendship.UNCONFIRMED) {
             log.info("Пользователь с id {} уже отправлял запрос на дружбу пользователю с id {}", userId, friendId);
         }
-        if (statusIdUserFriend == CONFIRMED) {
+        if (statusUserFriend == StatusFriendship.CONFIRMED) {
             log.info("Пользователь с id {} уже дружит с пользователем с id {}", userId, friendId);
         }
-        if (statusIdUserFriend == NO_STATUS) {
+        if (statusUserFriend == null) {
             log.info("Такой запрос делается впервые. Проверим на возможность подтвердить дружбу");
-            int statusIdFriendUser = getStatusIdFriendUser(userId, friendId);
-            if (statusIdFriendUser == UNCONFIRMED) {
+            StatusFriendship statusIdFriendUser = getStatusFriendUser(userId, friendId);
+            if (statusIdFriendUser == StatusFriendship.UNCONFIRMED) {
                 confirmFriendship(userId, friendId);
                 log.info("Пользователь с id {} подтвердил запрос дружбы пользователя с id {}", userId, friendId);
             }
-            if (statusIdFriendUser == NO_STATUS) {
+            if (statusIdFriendUser == null) {
                 sendRequestFriendship(userId, friendId);
                 log.info("Пользователь с id {} отправил запрос на дружбу пользователю с id {}", userId, friendId);
             }
@@ -63,18 +60,18 @@ public class UserService {
             return;
         }
         checkExistId(id, friendId);
-        int statusId = getStatusIdUserFriend(id, friendId);
-        if (statusId == CONFIRMED) {
+        StatusFriendship status = getStatusUserFriend(id, friendId);
+        if (status == StatusFriendship.CONFIRMED) {
             changeStatusFriendshipFriend(id, friendId);
             log.info("Статус дружбы у бывшего друга обновлен");
             deleteFriendshipUser(id, friendId);
             log.info("Пользователь с id {} удален из списка друзей пользователя с id {}", friendId, id);
         }
-        if (statusId == UNCONFIRMED) {
+        if (status == StatusFriendship.UNCONFIRMED) {
             deleteFriendshipUser(id, friendId);
             log.info("Пользователь с id {} удален из списка друзей пользователя с id {}", friendId, id);
         }
-        if (statusId == NO_STATUS) {
+        if (status == null) {
             log.info("Нельзя удалить несуществующего друга из списка друзей");
         }
     }
@@ -110,7 +107,7 @@ public class UserService {
         User friend = memoryUserStorage.getUser(friendId);
     }
 
-    private int getStatusIdUserFriend(long userId, long friendId) {
+    private StatusFriendship getStatusUserFriend(long userId, long friendId) {
         String queryFriendshipCheck = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
         Friendship friendship = jdbcTemplate.query(
                         queryFriendshipCheck,
@@ -120,10 +117,10 @@ public class UserService {
                 .stream()
                 .findAny()
                 .orElse(new Friendship());
-        return friendship.getStatusId();
+        return friendship.getStatus();
     }
 
-    private int getStatusIdFriendUser(long userId, long friendId) {
+    private StatusFriendship getStatusFriendUser(long userId, long friendId) {
         String queryFriendshipCheckReverse = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
         Friendship friendshipCheck = jdbcTemplate.query(
                         queryFriendshipCheckReverse,
@@ -133,20 +130,20 @@ public class UserService {
                 .stream()
                 .findAny()
                 .orElse(new Friendship());
-        return friendshipCheck.getStatusId();
+        return friendshipCheck.getStatus();
     }
 
     private void confirmFriendship(long userId, long friendId) {
         String queryConfirmFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
                 "WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(queryConfirmFriendshipFriend, 2, friendId, userId);
+        jdbcTemplate.update(queryConfirmFriendshipFriend, StatusFriendship.CONFIRMED, friendId, userId);
         String queryConfirmFriendshipUser = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, 2);
+        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, StatusFriendship.CONFIRMED);
     }
 
     private void sendRequestFriendship(long userId, long friendId) {
         String queryRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryRequestFriendship, userId, friendId, 1);
+        jdbcTemplate.update(queryRequestFriendship, userId, friendId, StatusFriendship.UNCONFIRMED.toString());
     }
 
     private void deleteFriendshipUser(long userId, long friendId) {
@@ -157,6 +154,6 @@ public class UserService {
     private void changeStatusFriendshipFriend(long userId, long friendId) {
         String queryChangeStatusFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
                 "WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(queryChangeStatusFriendshipFriend, 1, friendId, userId);
+        jdbcTemplate.update(queryChangeStatusFriendshipFriend, StatusFriendship.UNCONFIRMED, friendId, userId);
     }
 }
