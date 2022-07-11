@@ -5,7 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Friendship;
+import ru.yandex.practicum.filmorate.model.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.mappers.FriendshipMapper;
 import ru.yandex.practicum.filmorate.service.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.model.Validator;
 
@@ -85,5 +88,58 @@ public class DatabaseUserStorage implements UserStorage {
                 .orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));
         log.info("Пользователь с идентификатором {} найден.", id);
         return user;
+    }
+
+    public StatusFriendship getStatusFriendship(long userId, long friendId) {
+        String queryFriendshipCheck = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
+        Friendship friendship = jdbcTemplate.query(
+                        queryFriendshipCheck,
+                        new FriendshipMapper(),
+                        userId,
+                        friendId)
+                .stream()
+                .findAny()
+                .orElse(new Friendship());
+        return friendship.getStatus();
+    }
+    public void updateStatusFriendship(long userId, long friendId, StatusFriendship value) {
+        String queryConfirmFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
+                "WHERE USER_ID = ? AND FRIEND_ID = ?";
+        jdbcTemplate.update(queryConfirmFriendshipFriend, StatusFriendship.CONFIRMED, friendId, userId);
+        String queryConfirmFriendshipUser = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
+        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, StatusFriendship.CONFIRMED);
+    }
+    public void addFriendship(long userId, long friendId) {
+        String queryRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
+        jdbcTemplate.update(queryRequestFriendship, userId, friendId, StatusFriendship.UNCONFIRMED.toString());
+    }
+    public void deleteFriendship(long userId, long friendId) {
+        String queryDeleteRequestFriendshipUser = "DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
+        jdbcTemplate.update(queryDeleteRequestFriendshipUser, userId, friendId);
+    }
+    public List<User> getListFriend(long id) throws NotFoundException {
+        String query = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?)";
+        List<User> friends = jdbcTemplate.query(
+                query,
+                new UserMapper(),
+                id);
+        log.info("Получили список друзей пользователя с id {}", id);
+        return friends;
+    }
+
+    public List<User> getCommonUsers(long id, long friendId) throws NotFoundException {
+        String query = "SELECT *FROM USERS WHERE USER_ID IN(" +
+                "SELECT *FROM (" +
+                "SELECT FRIEND_ID FROM (" +
+                "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?) " +
+                "WHERE FRIEND_ID IN (" +
+                "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?)))";
+        List<User> commonFriends = jdbcTemplate.query(
+                query,
+                new UserMapper(),
+                id,
+                friendId);
+        log.info("Получили список общих друзей пользователей с id {} и {}", id, friendId);
+        return commonFriends;
     }
 }
