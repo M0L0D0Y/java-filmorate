@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import javax.validation.Valid;
@@ -61,9 +58,9 @@ public class FilmService {
         filmStorage.deleteFilm(id);
     }
 
-    public void addLikeFilm(long filmId, long userId) {
+    public void addLikeFilm(long filmId, long userId, int grade) {
         checkExistId(filmId, userId);
-        popularFilmsStorage.addLikeFilm(filmId, userId);
+        popularFilmsStorage.addLikeFilm(filmId, userId, grade);
     }
 
     public void deleteLike(long filmId, long userId) {
@@ -76,6 +73,8 @@ public class FilmService {
         List<Film> films = popularFilmsStorage.getMostPopularFilms(count);
         for (Film film : films) {
             film = filmStorage.getFilm(film.getId());
+            Grades grades = popularFilmsStorage.getGrades(film.getId());
+            film.setGrades(grades);
             updateFilms.add(film);
         }
         return updateFilms;

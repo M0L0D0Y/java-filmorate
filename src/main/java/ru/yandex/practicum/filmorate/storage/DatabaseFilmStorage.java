@@ -157,7 +157,7 @@ public class DatabaseFilmStorage implements FilmStorage {
     }
 
     private void addDataInTableFilmLikedUser(Film filmForReturn) {
-        String queryAddDataInTableFilmLikedUser = "INSERT INTO FILM_LIKED_USERS (FILM_ID, USER_ID) VALUES (?, ?)";
+        String queryAddDataInTableFilmLikedUser = "INSERT INTO FILM_GRADE_USERS (FILM_ID, GRADES) VALUES (?, ?)";
         jdbcTemplate.update(queryAddDataInTableFilmLikedUser, filmForReturn.getId(), null);
         log.info("Значения в таблицу FILM_LIKED_USERS внесены. USER_ID = null");
     }

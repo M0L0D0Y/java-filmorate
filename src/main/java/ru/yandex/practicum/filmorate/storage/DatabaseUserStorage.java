@@ -58,15 +58,18 @@ public class DatabaseUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(long id) throws NotFoundException {
+    public void deleteUser(long id) {
         User checkUser = getUser(id);//проверка существования такого id
-        String query = "DELETE  FROM USERS WHERE USER_ID = ?";
+        String queryDeleteFromUsers = "DELETE FROM FILM_GRADE_USERS WHERE USER_ID = ? AND FILM_ID IN(" +
+                "SELECT DISTINCT FILM_ID FROM FILM_GRADE_USERS)";
+        jdbcTemplate.update(queryDeleteFromUsers, id);
+        String query = "DELETE FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(query, id);
         log.info("Пользователь с id = {} удален", id);
     }
 
     @Override
-    public User updateUser(User user) throws NotFoundException, ValidationException {
+    public User updateUser(User user) {
         validator.validateUser(user);
         User checkUser = getUser(user.getId());//проверка существования такого id
         String query = "UPDATE USERS SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=?" +
@@ -77,7 +80,7 @@ public class DatabaseUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(long id) throws NotFoundException {
+    public User getUser(long id) {
         String query = "SELECT * FROM USERS WHERE USER_ID = ?";
         User user = jdbcTemplate.query(
                         query,
@@ -88,58 +91,5 @@ public class DatabaseUserStorage implements UserStorage {
                 .orElseThrow(() -> new NotFoundException("Пользователь с идентификатором " + id + " не найден."));
         log.info("Пользователь с идентификатором {} найден.", id);
         return user;
-    }
-
-    public FriendshipStatus getStatusFriendship(long userId, long friendId) {
-        String queryFriendshipCheck = "SELECT * FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
-        Friendship friendship = jdbcTemplate.query(
-                        queryFriendshipCheck,
-                        new FriendshipMapper(),
-                        userId,
-                        friendId)
-                .stream()
-                .findAny()
-                .orElse(new Friendship());
-        return friendship.getStatus();
-    }
-    public void updateStatusFriendship(long userId, long friendId, FriendshipStatus value) {
-        String queryConfirmFriendshipFriend = "UPDATE  FRIENDSHIP SET STATUS_ID = ? " +
-                "WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(queryConfirmFriendshipFriend, FriendshipStatus.CONFIRMED, friendId, userId);
-        String queryConfirmFriendshipUser = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryConfirmFriendshipUser, userId, friendId, FriendshipStatus.CONFIRMED);
-    }
-    public void addFriendship(long userId, long friendId) {
-        String queryRequestFriendship = "INSERT INTO FRIENDSHIP VALUES(?, ?, ?)";
-        jdbcTemplate.update(queryRequestFriendship, userId, friendId, FriendshipStatus.UNCONFIRMED.toString());
-    }
-    public void deleteFriendship(long userId, long friendId) {
-        String queryDeleteRequestFriendshipUser = "DELETE FROM FRIENDSHIP WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(queryDeleteRequestFriendshipUser, userId, friendId);
-    }
-    public List<User> getListFriend(long id) throws NotFoundException {
-        String query = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?)";
-        List<User> friends = jdbcTemplate.query(
-                query,
-                new UserMapper(),
-                id);
-        log.info("Получили список друзей пользователя с id {}", id);
-        return friends;
-    }
-
-    public List<User> getCommonUsers(long id, long friendId) throws NotFoundException {
-        String query = "SELECT *FROM USERS WHERE USER_ID IN(" +
-                "SELECT *FROM (" +
-                "SELECT FRIEND_ID FROM (" +
-                "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?) " +
-                "WHERE FRIEND_ID IN (" +
-                "SELECT FRIEND_ID FROM FRIENDSHIP WHERE USER_ID = ?)))";
-        List<User> commonFriends = jdbcTemplate.query(
-                query,
-                new UserMapper(),
-                id,
-                friendId);
-        log.info("Получили список общих друзей пользователей с id {} и {}", id, friendId);
-        return commonFriends;
     }
 }
