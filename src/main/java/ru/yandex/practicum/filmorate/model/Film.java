@@ -4,19 +4,22 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
 public class Film {
     private long id;
     @NotEmpty(message = "Нет названия фильма")
-    private final String name;
+    private String name;
     @NotEmpty(message = "Нет описания фильма")
-    private final String description;
+    private String description;
     @Past(message = "Дата релиза не может быть в будущем")
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма не может быть отрицательной")
-    private final int duration;
-    private Set<Long> likedUsers = new HashSet<>();
+    private int duration;
+    private Rating mpa;
+    private List<Genre> genres;
 }

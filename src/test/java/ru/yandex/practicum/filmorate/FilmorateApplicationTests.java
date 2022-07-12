@@ -1,172 +1,137 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.BeforeAll;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DatabaseFilmStorage;
+import ru.yandex.practicum.filmorate.storage.DatabaseUserStorage;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-class ValidatorTest {
-    private static final String EMPTY_STRING = "";
-    private static final String EMAIL_SYMBOL = "@";
-    private static Validator validator;
-    private static final LocalDate DATE_RELEASE = LocalDate.of(1895, 12, 28);
-    private static final int LINE_LENGTH = 201;
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+class FilmorateApplicationTests {
+    private static final String EMAIL = "test@mail.ru";
+    private static final String UPDATE_EMAIL = "update@mail.ru";
+    private static final String NAME = "testName";
+    private static final String UPDATE_NAME = "updateName";
+    private static final String LOGIN = "testLogin";
+    private static final String UPDATE_LOGIN = "dolore";
+    private static final LocalDate CORRECT_DATE = LocalDate.of(1990, 12, 15);
+    private static final LocalDate PAST_DATE = LocalDate.of(1800, 12, 15);
+    private static final String DESCRIPTION = "testDescription";
+    private static final int DURATION = 120;
+    private static final int UPDATE_DURATION = 90;
+    private final DatabaseUserStorage userStorage;
+    private final DatabaseFilmStorage filmDbStorage;
 
-    private static void validationUser(User user) throws ValidationException {
-        if ((user.getEmail() == null) || (!(user.getEmail().contains(EMAIL_SYMBOL)))) {
-            throw new ValidationException("Неправильный формат почты " + user.getEmail());
-        }
-        if ((user.getLogin() == null) || (EMPTY_STRING.equals(user.getLogin()))) {
-            throw new ValidationException("Неправильный формат логина " + user.getLogin());
-        }
-        if ((user.getName() == null) || (EMPTY_STRING.equals(user.getName()))) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем " + user.getBirthday());
-        }
-    }
-
-    private static void validationFilm(Film film) throws ValidationException {
-        if (film.getName() == null || EMPTY_STRING.equals(film.getName())) {
-            throw new ValidationException("Нет названия фильма " + film.getName());
-        }
-        if (film.getDescription().length() > LINE_LENGTH) {
-            throw new ValidationException("Длинна описания фильма слишком большая " +film.getDescription().length());
-        }
-        if (film.getReleaseDate().isBefore(DATE_RELEASE)) {
-            throw new ValidationException("Дата релиза перед " + DATE_RELEASE);
-        }
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность фильма меньше нуля " + film.getDuration());
-        }
-    }
-
-    @BeforeAll
-    static void createValidator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+    @Test
+    public void testUserCreateAndGet() throws ValidationException {
+        User userTest = new User();
+        userTest.setEmail(EMAIL);
+        userTest.setLogin(LOGIN);
+        userTest.setName(NAME);
+        userTest.setBirthday(CORRECT_DATE);
+        userStorage.addUser(userTest);
+        User user = userStorage.getUser(1L);
+        assertEquals(userTest.getEmail(), user.getEmail());
+        assertEquals(userTest.getName(), user.getName());
+        assertEquals(userTest.getLogin(), user.getLogin());
+        assertEquals(userTest.getBirthday(), user.getBirthday());
     }
 
     @Test
-    void createUserWithNullName() throws ValidationException {
-        User user = new User("test@mail.ru", "login", LocalDate.of(1990, 12, 15));
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(0, violations.size());
-        validationUser(user);
-        assertEquals("login", user.getName());
+    public void testUserUpdate() throws ValidationException {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail(UPDATE_EMAIL);
+        user.setLogin(UPDATE_LOGIN);
+        user.setName(UPDATE_NAME);
+        user.setBirthday(PAST_DATE);
+        userStorage.updateUser(user);
+        User updateUser = userStorage.getUser(1L);
+        assertEquals(user.getEmail(), updateUser.getEmail());
+        assertEquals(user.getName(), updateUser.getName());
+        assertEquals(user.getLogin(), updateUser.getLogin());
+        assertEquals(user.getBirthday(), updateUser.getBirthday());
     }
 
     @Test
-    void createUserWithNullLogin() {
-        User user = new User("test@mail.ru", "", LocalDate.of(1990, 12, 15));
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Логин не должен быть пустым", violations.iterator().next().getMessage());
-        assertThrows(ValidationException.class, () -> validationUser(user), "Неправильный формат логина");
+    public void testUserDeleteAndGetAll() throws ValidationException {
+        User userTest = new User();
+        userTest.setEmail(UPDATE_EMAIL);
+        userTest.setLogin(UPDATE_LOGIN);
+        userTest.setName(UPDATE_NAME);
+        userTest.setBirthday(PAST_DATE);
+        userStorage.addUser(userTest);
+        userStorage.deleteUser(2L);
+        List<User> users = new ArrayList<>(userStorage.getAllUser());
+        assertEquals(users.size(), 1);
     }
 
     @Test
-    void createUserWithIncorrectEmail() {
-        User user = new User("test_mail.ru", "login", LocalDate.of(1990, 12, 15));
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Почта должна быть правильного формата", violations.iterator().next().getMessage());
-        assertThrows(ValidationException.class, () -> validationUser(user), "Неправильный формат почты");
+    public void testFilmCreateAndGet() throws ValidationException {
+        Film filmTest = new Film();
+        filmTest.setName(NAME);
+        filmTest.setDescription(DESCRIPTION);
+        filmTest.setDuration(DURATION);
+        filmTest.setReleaseDate(CORRECT_DATE);
+        Rating rating = new Rating();
+        rating.setId(1);
+        filmTest.setMpa(rating);
+        filmDbStorage.addFilm(filmTest);
+        Film film = filmDbStorage.getFilm(1L);
+        assertEquals(filmTest.getName(), film.getName());
+        assertEquals(filmTest.getDescription(), film.getDescription());
+        assertEquals(filmTest.getDuration(), film.getDuration());
+        assertEquals(filmTest.getReleaseDate(), film.getReleaseDate());
+        assertEquals(filmTest.getMpa().getId(), film.getMpa().getId());
     }
 
     @Test
-    void createUserWithIncorrectBirthday() {
-        User user = new User("test@mail.ru", "login", LocalDate.of(2200, 12, 15));
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Дата рождения должна быть в прошлом", violations.iterator().next().getMessage());
-        assertThrows(ValidationException.class, () -> validationUser(user),
-                "Дата рождения не может быть в будущем");
+    public void testFilmUpdate() throws ValidationException {
+        Film filmTest = new Film();
+        filmTest.setId(1L);
+        filmTest.setDescription(DESCRIPTION);
+        filmTest.setDuration(UPDATE_DURATION);
+        filmTest.setName(UPDATE_NAME);
+        filmTest.setReleaseDate(CORRECT_DATE);
+        Rating rating = new Rating();
+        rating.setId(1);
+        filmTest.setMpa(rating);
+        filmDbStorage.updateFilm(filmTest);
+        Film film = filmDbStorage.getFilm(1L);
+        assertEquals(filmTest.getName(), film.getName());
+        assertEquals(filmTest.getDescription(), film.getDescription());
+        assertEquals(filmTest.getDuration(), film.getDuration());
+        assertEquals(filmTest.getReleaseDate(), film.getReleaseDate());
+        assertEquals(filmTest.getMpa().getId(), film.getMpa().getId());
     }
 
     @Test
-    void createFilm() {
-        Film film = new Film("testName", "testDescription",
-                LocalDate.of(1990, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(0, violations.size());
-    }
-
-    @Test
-    void createFilmWithNullName() {
-        Film film = new Film("", "testDescription",
-                LocalDate.of(1990, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1, violations.size());
-        assertEquals("Нет названия фильма", violations.iterator().next().getMessage());
-        assertThrows(ValidationException.class, () -> validationFilm(film),
-                "Нет названия фильма");
-    }
-
-    @Test
-    void createFilmWithNullDescription() {
-        Film film = new Film("testName", "",
-                LocalDate.of(1990, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1, violations.size());
-        assertEquals("Нет описания фильма", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    void createFilmWithIncorrectDescription() {
-        Film film = new Film("testName", "Через некоторое время мы обнаружили, " +
-                "что наш контент-менеджер обладает повышенным количеством свободного времени и " +
-                "решили поручить ему выполнение дополнительной работы. Это повысило ему заработную " +
-                "плату и помогло уменьшить нагрузку коллектива вцелом. В итоге счастлив " +
-                "контент-менеджер и радуется вся команда!",
-                LocalDate.of(1990, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(0, violations.size());
-        assertThrows(ValidationException.class, () -> validationFilm(film),
-                "Длинна описания фильма слишком большая");
-    }
-
-    @Test
-    void createFilmWithReleaseDateInPats() {
-        Film film = new Film("testName", "testDescription",
-                LocalDate.of(1120, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(0, violations.size());
-        assertThrows(ValidationException.class, () -> validationFilm(film),
-                "Дата релиза перед " + DATE_RELEASE);
-    }
-
-    @Test
-    void createFilmWithReleaseDateInFuture() {
-        Film film = new Film("testName", "testDescription",
-                LocalDate.of(2200, 12, 15), 120);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1, violations.size());
-        assertEquals("Дата релиза не может быть в будущем", violations.iterator().next().getMessage());
-    }
-
-    @Test
-    void createFilmWithIncorrectDuration() {
-        Film film = new Film("testName", "testDescription",
-                LocalDate.of(1920, 12, 15), -1);
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(1, violations.size());
-        assertEquals("Продолжительность фильма не может быть отрицательной", violations.iterator().next().getMessage());
-        assertThrows(ValidationException.class, () -> validationFilm(film),
-                "Продолжительность фильма меньше нуля " + film.getDuration());
+    public void testFilmDeleteAndGetAll() throws ValidationException {
+        Film filmTest = new Film();
+        filmTest.setDescription(DESCRIPTION);
+        filmTest.setDuration(DURATION);
+        filmTest.setName(NAME);
+        filmTest.setReleaseDate(CORRECT_DATE);
+        Rating rating = new Rating();
+        rating.setId(1);
+        filmTest.setMpa(rating);
+        filmDbStorage.addFilm(filmTest);
+        filmDbStorage.deleteFilm(2L);
+        List<Film> films = new ArrayList<>(filmDbStorage.getAllFilm());
+        assertEquals(films.size(), 1);
     }
 }

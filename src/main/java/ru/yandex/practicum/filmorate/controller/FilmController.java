@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
@@ -17,52 +19,70 @@ import java.util.List;
 @RestController
 public class FilmController {
     private final FilmService filmService;
-    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmController(FilmService filmService, FilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilm();
+        return filmService.getAllFilms();
     }
 
     @GetMapping(value = "/films/{id}")
-    public void getFilm(@PathVariable long id) throws NotFoundException {
-        filmStorage.getFilm(id);
+    public Film getFilm(@PathVariable long id) {
+        return filmService.getFilmById(id);
     }
 
     @GetMapping(value = "/films/popular")
-    private List<Film> getMostPopularFilms(
+    public List<Film> getMostPopularFilms(
             @RequestParam(defaultValue = "10") long count) {
         return filmService.getMostPopularFilms(count);
     }
 
+    @GetMapping(value = "/genres/{id}")
+    public Genre getGenreById(@PathVariable int id) {
+        return filmService.getGenreById(id);
+    }
+
+    @GetMapping(value = "/genres")
+    public Collection<Genre> getAllGenres() {
+        return filmService.getAllGenres();
+    }
+
+    @GetMapping(value = "/mpa/{id}")
+    public Rating getRatingById(@PathVariable int id) {
+        return filmService.getRatingById(id);
+    }
+
+    @GetMapping(value = "/mpa")
+    public Collection<Rating> getAllRating() {
+        return filmService.getAllRating();
+    }
+
     @PostMapping(value = "/films")
-    public Film addFilm(@Valid @RequestBody Film film) throws ValidationException {
-        return filmStorage.addFilm(film);
+    public Film addFilm(@Valid @RequestBody Film film) {
+        return filmService.addFilm(film);
     }
 
     @PutMapping(value = "/films")
-    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException, NotFoundException {
-        return filmStorage.updateFilm(film);
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        return filmService.updateFilm(film);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public void addLikeFilm(@PathVariable long id, @PathVariable long userId) throws NotFoundException {
+    public void addLikeFilm(@PathVariable long id, @PathVariable long userId) {
         filmService.addLikeFilm(id, userId);
     }
 
     @DeleteMapping(value = "/films")
-    public void deleteFilm(@RequestParam long id) throws NotFoundException {
-        filmStorage.deleteFilm(id);
+    public void deleteFilm(@RequestParam long id) {
+        filmService.deleteFilm(id);
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void deleteLike(@PathVariable long id, @PathVariable long userId) throws NotFoundException {
+    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
         filmService.deleteLike(id, userId);
     }
 }

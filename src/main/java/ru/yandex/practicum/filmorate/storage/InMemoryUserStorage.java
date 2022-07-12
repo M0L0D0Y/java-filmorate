@@ -3,17 +3,13 @@ package ru.yandex.practicum.filmorate.storage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.Validator;
+import ru.yandex.practicum.filmorate.service.Validator;
 import ru.yandex.practicum.filmorate.service.UserIdGenerator;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private final Validator validator;
@@ -31,7 +27,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User addUser(User user) throws ValidationException {
+    public User addUser(User user) {
         validator.validateUser(user);
         user.setId(userIdGenerator.generate());
         users.put(user.getId(), user);
@@ -39,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(long id) throws NotFoundException {
+    public void deleteUser(long id) {
         Set<Long> listIdUser = users.keySet();
         if (!(listIdUser.contains(id))) {
             throw new NotFoundException("Нет пользователя с таким Id " + id);
@@ -48,7 +44,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) throws ValidationException, NotFoundException {
+    public User updateUser(User user) {
         Set<Long> listIdUser = users.keySet();
         if (!(listIdUser.contains(user.getId()))) {
             throw new NotFoundException("Нет пользователя с таким Id " + user.getId());
@@ -59,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(long id) throws NotFoundException {
+    public User getUser(long id) {
         Set<Long> listIdUser = users.keySet();
         if (!(listIdUser.contains(id))) {
             throw new NotFoundException("Нет пользователя с таким Id " + id);
